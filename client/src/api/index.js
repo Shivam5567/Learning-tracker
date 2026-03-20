@@ -29,6 +29,7 @@ export const deleteCategory = (id) => API.delete(`/categories/${id}`);
 export const addSection = (categoryId, data) => API.post(`/categories/${categoryId}/sections`, data);
 export const updateSection = (categoryId, sectionId, data) => API.put(`/categories/${categoryId}/sections/${sectionId}`, data);
 export const deleteSection = (categoryId, sectionId) => API.delete(`/categories/${categoryId}/sections/${sectionId}`);
+export const resetSection = (categoryId, sectionId) => API.put(`/categories/${categoryId}/sections/${sectionId}/reset`);
 
 // Topics
 export const addTopic = (categoryId, sectionId, data) => API.post(`/categories/${categoryId}/sections/${sectionId}/topics`, data);

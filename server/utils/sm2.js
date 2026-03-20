@@ -40,9 +40,10 @@ function calculateSM2(topic, quality) {
     easeFactor = 1.3;
   }
 
-  // Calculate next review date
+  // Calculate next review date — set to start of day so revision is available the whole day
   const nextReview = new Date();
   nextReview.setDate(nextReview.getDate() + interval);
+  nextReview.setHours(0, 0, 0, 0);
 
   return {
     easeFactor: Math.round(easeFactor * 100) / 100,

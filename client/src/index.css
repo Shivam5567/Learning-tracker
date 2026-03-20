@@ -400,6 +400,24 @@ input, textarea, select {
   font-weight: 600;
 }
 
+.category-delete-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-delete-btn:hover {
+  color: var(--danger);
+  background: rgba(231, 76, 60, 0.1);
+}
+
 /* Add new category card */
 .category-card.add-new {
   border-style: dashed;

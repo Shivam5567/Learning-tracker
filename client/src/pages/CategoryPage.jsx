@@ -10,6 +10,7 @@ import {
   completeTopic,
   reviseTopic,
   importTopics,
+  resetSection,
 } from '../api';
 import ProgressRing from '../components/ProgressRing';
 import SectionAccordion from '../components/SectionAccordion';
@@ -148,6 +149,28 @@ export default function CategoryPage() {
       fetchCategory();
     } catch (err) {
       console.error('Delete topic error:', err);
+    }
+  };
+
+  const handleDeleteSection = async (sectionId) => {
+    if (window.confirm('Are you sure you want to delete this section and all its topics?')) {
+      try {
+        await deleteSection(id, sectionId);
+        fetchCategory();
+      } catch (err) {
+        console.error('Delete section error:', err);
+      }
+    }
+  };
+
+  const handleResetSection = async (sectionId) => {
+    if (window.confirm('Are you sure you want to reset all progress in this section?')) {
+      try {
+        await resetSection(id, sectionId);
+        fetchCategory();
+      } catch (err) {
+        console.error('Reset section error:', err);
+      }
     }
   };
 
@@ -420,6 +443,8 @@ export default function CategoryPage() {
               onToggleComplete={(topic) => handleToggleComplete(topic, section._id)}
               onDeleteTopic={(topic) => handleDeleteTopic(topic, section._id)}
               onAddTopic={openAddTopic}
+              onDeleteSection={handleDeleteSection}
+              onResetSection={handleResetSection}
             />
           ))
         ) : (

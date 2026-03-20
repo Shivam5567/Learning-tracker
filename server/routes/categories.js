@@ -144,9 +144,42 @@ router.delete('/:id/sections/:sectionId', async (req, res) => {
   }
 });
 
+// @route   PUT /api/categories/:id/sections/:sectionId/reset
+// @desc    Reset all topics in a section (unmark completed, reset SM-2)
+router.put('/:id/sections/:sectionId/reset', async (req, res) => {
+  try {
+    const category = await Category.findOne({ _id: req.params.id, user: req.user._id });
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    const section = category.sections.id(req.params.sectionId);
+    if (!section) {
+      return res.status(404).json({ message: 'Section not found' });
+    }
+
+    // Reset all topics in this section
+    section.topics.forEach(topic => {
+      topic.completed = false;
+      topic.completedItems = 0;
+      topic.nextReview = null;
+      topic.lastReviewed = null;
+      topic.easeFactor = 2.5;
+      topic.interval = 0;
+      topic.repetitions = 0;
+    });
+
+    await category.save();
+    res.json(category);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // ========================
 // TOPIC ROUTES
 // ========================
+
 
 // @route   POST /api/categories/:id/sections/:sectionId/topics
 // @desc    Add a topic to a section

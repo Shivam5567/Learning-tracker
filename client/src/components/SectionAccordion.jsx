@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import TopicRow from './TopicRow';
 
-export default function SectionAccordion({ section, onToggleComplete, onDeleteTopic, onAddTopic }) {
+export default function SectionAccordion({ section, onToggleComplete, onDeleteTopic, onAddTopic, onDeleteSection, onResetSection }) {
   const [expanded, setExpanded] = useState(false);
 
   const completedCount = section.topics.filter(t => t.completed).length;
@@ -21,6 +21,26 @@ export default function SectionAccordion({ section, onToggleComplete, onDeleteTo
             className="section-progress-mini-fill"
             style={{ width: `${progressPercent}%` }}
           />
+        </div>
+
+        {/* Section action buttons */}
+        <div className="section-actions" onClick={(e) => e.stopPropagation()}>
+          {completedCount > 0 && (
+            <button
+              className="section-action-btn"
+              onClick={() => onResetSection(section._id)}
+              title="Reset all topics"
+            >
+              ↺
+            </button>
+          )}
+          <button
+            className="section-action-btn section-action-delete"
+            onClick={() => onDeleteSection(section._id)}
+            title="Delete section"
+          >
+            🗑
+          </button>
         </div>
       </div>
 

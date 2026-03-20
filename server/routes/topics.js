@@ -118,13 +118,15 @@ router.put('/revise', async (req, res) => {
 router.get('/due', async (req, res) => {
   try {
     const categories = await Category.find({ user: req.user._id });
-    const now = new Date();
+    // Use end of today so topics due today show up all day
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
     const dueTopics = [];
 
     categories.forEach(category => {
       category.sections.forEach(section => {
         section.topics.forEach(topic => {
-          if (topic.completed && topic.nextReview && new Date(topic.nextReview) <= now) {
+          if (topic.completed && topic.nextReview && new Date(topic.nextReview) <= endOfToday) {
             dueTopics.push({
               categoryId: category._id,
               categoryName: category.name,
