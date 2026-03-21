@@ -21,6 +21,13 @@ export default function Sidebar() {
         >
           🏠
         </NavLink>
+        <NavLink
+          to="/todo"
+          className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}
+          title="To-Do List"
+        >
+          ☑️
+        </NavLink>
       </nav>
       <div className="sidebar-spacer" />
       <button className="sidebar-user" onClick={handleLogout} title="Logout">

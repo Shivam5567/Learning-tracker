@@ -44,4 +44,10 @@ export const getReviewHistory = () => API.get('/topics/review-history');
 // Import
 export const importTopics = (categoryId, data) => API.post(`/categories/${categoryId}/import`, data);
 
+// Todos
+export const getTodos = (params) => API.get('/todos', { params });
+export const createTodo = (data) => API.post('/todos', data);
+export const updateTodo = (id, data) => API.put(`/todos/${id}`, data);
+export const deleteTodo = (id) => API.delete(`/todos/${id}`);
+
 export default API;
