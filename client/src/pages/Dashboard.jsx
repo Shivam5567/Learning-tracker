@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getCategories, createCategory, deleteCategory, getDueTopics } from '../api';
 import CategoryCard from '../components/CategoryCard';
 import Modal from '../components/Modal';
+import ActivityCalendar from '../components/ActivityCalendar';
 
 const PRESET_CATEGORIES = [
   { name: 'DSA', description: 'Data Structures & Algorithms' },
@@ -140,6 +141,8 @@ export default function Dashboard() {
           <span>Add New Category</span>
         </div>
       </div>
+
+      <ActivityCalendar />
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Create New Category">
         {/* Preset Categories */}

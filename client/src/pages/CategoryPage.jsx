@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import {
@@ -54,7 +54,7 @@ export default function CategoryPage() {
   const [importResult, setImportResult] = useState('');
   const fileInputRef = useRef(null);
 
-  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  const quote = useMemo(() => quotes[Math.floor(Math.random() * quotes.length)], []);
 
   useEffect(() => {
     fetchCategory();

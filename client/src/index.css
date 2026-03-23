@@ -1550,3 +1550,320 @@ input, textarea, select {
   color: var(--danger);
   background: rgba(231, 76, 60, 0.1);
 }
+
+/* ==============================
+   ACTIVITY CALENDAR (STREAK) STYLES
+   ============================== */
+.activity-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  margin-top: 32px;
+  margin-bottom: 24px;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.activity-header h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.streak-count {
+  background: rgba(230, 126, 34, 0.15);
+  color: var(--accent-primary);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.activity-calendar-wrapper {
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.activity-calendar-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.activity-calendar-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  grid-auto-flow: column;
+  gap: 4px;
+  width: max-content;
+}
+
+.activity-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.05); /* empty/level-0 */
+  position: relative;
+  transition: transform var(--transition-fast), outline var(--transition-fast);
+}
+
+.activity-cell.empty {
+  background: transparent;
+  pointer-events: none;
+}
+
+.activity-cell:not(.empty):hover {
+  outline: 1px solid rgba(255, 255, 255, 0.5);
+  transform: scale(1.2);
+  z-index: 10;
+}
+
+/* GitHub-style green theme, customized for our orange/dark app */
+/* We'll use our orange accent variable blended into levels */
+.activity-cell.level-0 { background: rgba(255, 255, 255, 0.05); }
+.activity-cell.level-1 { background: rgba(230, 126, 34, 0.25); }
+.activity-cell.level-2 { background: rgba(230, 126, 34, 0.5); }
+.activity-cell.level-3 { background: rgba(230, 126, 34, 0.75); }
+.activity-cell.level-4 { background: rgba(230, 126, 34, 1); }
+
+.activity-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ==============================
+   POMODORO TIMER STYLES
+   ============================== */
+.pomodoro-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 280px;
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pomo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pomo-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.pomo-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pomo-tab:hover {
+  color: var(--text-primary);
+}
+
+.pomo-tab.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.pomo-minimize-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.pomo-minimize-btn:hover {
+  color: var(--text-primary);
+}
+
+.pomo-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.pomo-circle-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomo-circle-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: rotate(-90deg);
+}
+
+.pomo-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 6;
+}
+
+.pomo-circle-progress {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+}
+
+.pomo-time-display {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomo-custom-input-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.pomo-custom-input {
+  width: 48px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--text-muted);
+  color: var(--text-primary);
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.pomo-custom-input:focus {
+  border-bottom-color: #9b59b6;
+}
+
+/* Hide number input spinners */
+.pomo-custom-input::-webkit-outer-spin-button,
+.pomo-custom-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pomo-custom-label {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.pomo-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pomo-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pomo-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.pomo-btn.play {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.pomo-btn.play:hover {
+  background: var(--accent-hover);
+}
+
+.pomodoro-minimized {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(12px);
+  border: 2px solid;
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.pomodoro-minimized:hover {
+  transform: scale(1.05);
+}
+
+.pomo-mini-time {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+}
+
+.activity-legend span {
+  margin: 0 4px;
+}

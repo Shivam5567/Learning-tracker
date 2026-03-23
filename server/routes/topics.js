@@ -3,6 +3,7 @@ const Category = require('../models/Category');
 const ReviewHistory = require('../models/ReviewHistory');
 const { calculateSM2, getRevisionLabel } = require('../utils/sm2');
 const { protect } = require('../middleware/auth');
+const { logActivity } = require('./activity');
 
 const router = express.Router();
 
@@ -50,6 +51,9 @@ router.put('/complete', async (req, res) => {
         topicName: topic.name,
         quality: quality || 4,
       });
+
+      // Log github-style activity streak
+      await logActivity(req.user._id);
     } else {
       // Undo completion
       topic.completed = false;
@@ -105,6 +109,9 @@ router.put('/revise', async (req, res) => {
       topicName: topic.name,
       quality,
     });
+
+    // Log github-style activity streak
+    await logActivity(req.user._id);
 
     await category.save();
     res.json(category);

@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import CategoryPage from './pages/CategoryPage';
 import Auth from './pages/Auth';
 import TodoPage from './pages/TodoPage';
+import PomodoroTimer from './components/PomodoroTimer';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -27,6 +28,7 @@ function ProtectedRoute({ children }) {
       <main className="main-content">
         {children}
       </main>
+      <PomodoroTimer />
     </div>
   );
 }

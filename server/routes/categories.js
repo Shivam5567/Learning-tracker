@@ -1,5 +1,6 @@
 const express = require('express');
 const Category = require('../models/Category');
+const ReviewHistory = require('../models/ReviewHistory');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -77,6 +78,10 @@ router.delete('/:id', async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
+
+    // Cascade delete review histories for this category
+    await ReviewHistory.deleteMany({ categoryId: req.params.id, user: req.user._id });
+
     res.json({ message: 'Category deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -134,6 +139,15 @@ router.delete('/:id/sections/:sectionId', async (req, res) => {
     const category = await Category.findOne({ _id: req.params.id, user: req.user._id });
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
+    }
+
+    const section = category.sections.id(req.params.sectionId);
+    if (section) {
+      // Find all topic IDs in this section and cascade delete their histories
+      const topicIds = section.topics.map(t => t._id);
+      if (topicIds.length > 0) {
+        await ReviewHistory.deleteMany({ topicId: { $in: topicIds }, user: req.user._id });
+      }
     }
 
     category.sections.pull({ _id: req.params.sectionId });
@@ -226,6 +240,10 @@ router.delete('/:id/sections/:sectionId/topics/:topicId', async (req, res) => {
 
     section.topics.pull({ _id: req.params.topicId });
     await category.save();
+
+    // Cascade delete review histories for this topic
+    await ReviewHistory.deleteMany({ topicId: req.params.topicId, user: req.user._id });
+
     res.json(category);
   } catch (error) {
     res.status(500).json({ message: error.message });
