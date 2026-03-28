@@ -1,3 +1,6 @@
+import React from 'react';
+import { BarChart3, CheckCircle2 } from './Icons';
+
 /**
  * DSA Stats Widget — shows Easy/Medium/Hard breakdown for DSA categories.
  */
@@ -25,8 +28,8 @@ export default function DsaStatsWidget({ sections }) {
 
   return (
     <div className="bento-widget">
-      <h3 style={{ marginBottom: '16px', fontSize: '1.1rem', color: 'var(--text-primary)' }}>
-        📊 Problem Breakdown
+      <h3 style={{ marginBottom: '16px', fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
+        <BarChart3 size={18} style={{marginRight: '8px'}} /> Problem Breakdown
       </h3>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
         {config.map(({ key, color, bg }) => (
@@ -55,8 +58,8 @@ export default function DsaStatsWidget({ sections }) {
         );
       })}
 
-      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-        <span>Total solved</span>
+      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-secondary)', alignItems: 'center' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center' }}><CheckCircle2 size={16} style={{marginRight: '8px'}} /> Total solved</span>
         <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{totalDone} / {totalAll}</span>
       </div>
     </div>

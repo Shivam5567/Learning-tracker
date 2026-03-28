@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getActivity } from '../api';
-import { formatDate } from '../utils/helpers'; // Assuming we have or don't need this, we'll write a small local helper
+import { formatDate } from '../utils/helpers';
+import { Flame } from './Icons';
 
 export default function ActivityCalendar() {
   const [activityMap, setActivityMap] = useState(new Map());
@@ -92,7 +93,7 @@ export default function ActivityCalendar() {
   return (
     <div className="activity-card slide-up">
       <div className="activity-header">
-        <h2>🔥 Streak Tracker</h2>
+        <h2><Flame size={20} style={{marginRight: '8px', color: 'var(--accent-primary)', verticalAlign: 'text-bottom'}} /> Streak Tracker</h2>
         <span className="streak-count">{currentStreak} day streak</span>
       </div>
       

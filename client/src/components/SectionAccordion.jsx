@@ -9,6 +9,7 @@ export default function SectionAccordion({
   onDeleteSection,
   onResetSection,
   onEditTopic,
+  onShowNotes,
   features = {}
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -80,6 +81,7 @@ export default function SectionAccordion({
               onToggleComplete={() => onToggleComplete(topic)}
               onDelete={() => onDeleteTopic(topic)}
               onEdit={() => onEditTopic(topic, section._id)}
+              onShowNotes={() => onShowNotes(topic)}
             />
           ))}
 

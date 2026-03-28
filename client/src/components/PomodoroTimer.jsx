@@ -13,6 +13,10 @@ export default function PomodoroTimer() {
   const [timeLeft, setTimeLeft] = useState(MODES.POMODORO.minutes * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const hasMoved = useRef(false);
   
   const timerRef = useRef(null);
 
@@ -87,6 +91,56 @@ export default function PomodoroTimer() {
     setTimeLeft(mins * 60);
   };
 
+  // Draggable logic
+  const handleMouseDown = (e) => {
+    // Only allow dragging if NOT clicking on interactive elements
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('textarea')) return;
+    
+    setIsDragging(true);
+    hasMoved.current = false;
+    dragStartPos.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    };
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+
+      const newX = e.clientX - dragStartPos.current.x;
+      const newY = e.clientY - dragStartPos.current.y;
+
+      // Threshold to detect movement (e.g., 3 pixels)
+      if (Math.abs(newX - position.x) > 3 || Math.abs(newY - position.y) > 3) {
+        hasMoved.current = true;
+      }
+      
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      // Prevent text selection while dragging
+      document.body.style.userSelect = 'none';
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+    };
+  }, [isDragging, position]);
+
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -102,9 +156,14 @@ export default function PomodoroTimer() {
   if (isMinimized) {
     return (
       <div 
-        className="pomodoro-minimized slide-up" 
-        onClick={() => setIsMinimized(false)}
-        style={{ borderColor: mode.color }}
+        className={`pomodoro-minimized slide-up ${isDragging ? 'dragging' : ''}`}
+        onClick={() => !hasMoved.current && setIsMinimized(false)}
+        onMouseDown={handleMouseDown}
+        style={{ 
+          borderColor: mode.color,
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          transition: isDragging ? 'none' : 'transform 0.2s ease'
+        }}
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={mode.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
@@ -123,7 +182,14 @@ export default function PomodoroTimer() {
   const offset = circumference - (progressPercent / 100) * circumference;
 
   return (
-    <div className="pomodoro-widget slide-up">
+    <div 
+      className={`pomodoro-widget slide-up ${isDragging ? 'dragging' : ''}`}
+      onMouseDown={handleMouseDown}
+      style={{ 
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        transition: isDragging ? 'none' : 'transform 0.2s ease'
+      }}
+    >
       <div className="pomo-header">
         <div className="pomo-tabs">
           {Object.values(MODES).map((m) => (

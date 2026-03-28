@@ -1,7 +1,9 @@
+import React from 'react';
+import { Globe, Library, ClipboardList } from './Icons';
 
 const SHORTCUT_GROUPS = [
   {
-    group: '🌐 Global',
+    group: <><Globe size={16} style={{marginRight: '8px'}} /> Global</>,
     shortcuts: [
       { keys: ['Ctrl', 'K'], label: 'Open search' },
       { keys: ['?'], label: 'Show this help' },
@@ -11,13 +13,13 @@ const SHORTCUT_GROUPS = [
     ],
   },
   {
-    group: '📚 Dashboard',
+    group: <><Library size={16} style={{marginRight: '8px'}} /> Dashboard</>,
     shortcuts: [
       { keys: ['N'], label: 'New category' },
     ],
   },
   {
-    group: '📋 Category Page',
+    group: <><ClipboardList size={16} style={{marginRight: '8px'}} /> Category Page</>,
     shortcuts: [
       { keys: ['N'], label: 'Add topic to last section' },
       { keys: ['S'], label: 'Add new section' },

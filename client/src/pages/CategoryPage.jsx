@@ -1,18 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import {
-  getCategory,
-  addSection,
-  deleteSection,
-  addTopic,
-  editTopic,
-  deleteTopic,
-  completeTopic,
-  reviseTopic,
-  importTopics,
-  resetSection,
+import { 
+  getCategory, addSection, deleteSection, addTopic, editTopic, 
+  deleteTopic, completeTopic, reviseTopic, importTopics, resetSection
 } from '../api';
+import { Trophy, Upload, ClipboardList, CheckCircle2, Edit3, Library, Search, BarChart3 } from '../components/Icons';
 import ProgressRing from '../components/ProgressRing';
 import SectionAccordion from '../components/SectionAccordion';
 import Modal from '../components/Modal';
@@ -75,6 +68,8 @@ export default function CategoryPage() {
 
   // Import modal
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [activeTopic, setActiveTopic] = useState(null);
   const [importData, setImportData] = useState(null);
   const [importError, setImportError] = useState('');
   const [importLoading, setImportLoading] = useState(false);
@@ -105,6 +100,25 @@ export default function CategoryPage() {
 
   // F → Focus search
   useKeyboardShortcut('f', () => searchInputRef.current?.focus(), { disabled: anyModalOpen });
+
+  // Function to get dynamic placeholders based on category type
+  const getPlaceholders = () => {
+    const type = category?.type || 'other';
+    switch (type) {
+      case 'dsa':
+        return { name: "e.g. Build-up Logical Thinking", url: "e.g. https://leetcode.com/problems/..." };
+      case 'books':
+        return { name: "e.g. Chapter 1: Introduction", url: "e.g. Link to book resource (Optional)" };
+      case 'theory':
+        return { name: "e.g. Database Indexing", url: "e.g. https://wikipedia.org/..." };
+      case 'practical':
+        return { name: "e.g. Implement Login Page", url: "e.g. https://github.com/..." };
+      default:
+        return { name: "e.g. Your topic name", url: "e.g. https://example.com" };
+    }
+  };
+
+  const placeholders = getPlaceholders();
 
   // 1 → All filter, 2 → Revision Due filter
   useKeyboardShortcut('1', () => setFilter('all'), { disabled: anyModalOpen });
@@ -428,6 +442,11 @@ export default function CategoryPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const openNotesModal = (topic) => {
+    setActiveTopic(topic);
+    setShowNotesModal(true);
+  };
+
   if (loading) {
     return (
       <div className="spinner-container">
@@ -500,21 +519,59 @@ export default function CategoryPage() {
 
   return (
     <div className="bento-dashboard fade-in">
+      <style>{`
+        .topic-notes-btn {
+          background: transparent !important;
+          border: none !important;
+          padding: 4px;
+          margin-left: 8px;
+          color: var(--text-muted);
+          cursor: pointer;
+          border-radius: 4px;
+          display: inline-flex;
+          align-items: center;
+          transition: all 0.2s ease;
+          opacity: 0.7;
+          width: auto !important;
+          height: auto !important;
+          min-width: 0 !important;
+          line-height: 0 !important;
+        }
+        .topic-notes-btn:hover {
+          background: var(--bg-secondary) !important;
+          color: var(--accent-primary) !important;
+          opacity: 1;
+        }
+        .notes-content-box {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 20px;
+          min-height: 120px;
+          max-height: 60vh;
+          overflow-y: auto;
+          color: var(--text-primary);
+          font-size: 0.95rem;
+          line-height: 1.6;
+        }
+      `}</style>
       {/* Hero Header */}
       <div className="bento-hero slide-up">
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button onClick={() => navigate('/dashboard')} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: '44px', height: '44px', borderRadius: '50%', color: 'white', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>←</button>
+          <button onClick={() => navigate('/dashboard')} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: '44px', height: '44px', borderRadius: '50%', color: 'white', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+            <BarChart3 size={20} style={{transform: 'rotate(-90deg)'}} />
+          </button>
           <div>
             <h1 style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px', background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{category.name}</h1>
             <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '1rem' }}>
-              {completedTopics} of {totalTopics} completed • {masteredTopics} Mastered 🏆
+              {completedTopics} of {totalTopics} completed • {masteredTopics} Mastered <Trophy size={14} style={{verticalAlign: 'middle', marginLeft: '4px', color: 'var(--warning)'}} />
             </p>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <ProgressRing progress={progress} size={64} strokeWidth={5} textSize="small" />
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-secondary" onClick={() => setShowImportModal(true)}>📥 Import</button>
+            <button className="btn btn-secondary" onClick={() => setShowImportModal(true)}><Upload size={18} style={{marginRight: '8px'}} /> Import</button>
             <button className="btn btn-primary" onClick={() => setShowSectionModal(true)}>+ Add Section</button>
           </div>
         </div>
@@ -525,7 +582,7 @@ export default function CategoryPage() {
         {/* Left Column — Filters + Sections */}
         <div>
           {/* Filters */}
-          <div className="category-filters">
+          <div className="category-filters" style={{ position: 'relative' }}>
             <button
               className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
               onClick={() => setFilter('all')}
@@ -544,19 +601,20 @@ export default function CategoryPage() {
                   className={`filter-tab ${filter === 'mastered' ? 'active' : ''}`}
                   onClick={() => setFilter('mastered')}
                 >
-                  Mastered 🏆
+                  Mastered <Trophy size={14} style={{marginLeft: '6px', color: 'var(--warning)'}} />
                 </button>
               </>
             )}
             <input
               ref={searchInputRef}
               type="text"
-              className="search-input"
-              placeholder="🔍 Search topics... (F)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+               className="search-input"
+               placeholder="Search topics... (F)"
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+             />
+             <Search size={18} style={{position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)'}} />
+           </div>
 
           {/* Sections */}
           {filteredSections.length > 0 ? (
@@ -571,12 +629,13 @@ export default function CategoryPage() {
                 onAddTopic={openAddTopic}
                 onDeleteSection={handleDeleteSection}
                 onResetSection={handleResetSection}
+                onShowNotes={openNotesModal}
               />
             ))
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">
-                {filter === 'revision' ? '✅' : filter === 'mastered' ? '🏆' : '📋'}
+             <div className="empty-icon">
+                {filter === 'revision' ? <CheckCircle2 size={48} /> : filter === 'mastered' ? <Trophy size={48} /> : <ClipboardList size={48} />}
               </div>
               <p>
                 {filter === 'revision'
@@ -664,7 +723,7 @@ export default function CategoryPage() {
             <label>Topic Name</label>
             <input
               type="text"
-              placeholder="e.g. Build-up Logical Thinking"
+              placeholder={placeholders.name}
               value={newTopicName}
               onChange={(e) => setNewTopicName(e.target.value)}
               autoFocus
@@ -675,7 +734,7 @@ export default function CategoryPage() {
               <label>Link / URL (Optional)</label>
               <input
                 type="url"
-                placeholder="e.g. https://leetcode.com/problems/..."
+                placeholder={placeholders.url}
                 value={newTopicUrl}
                 onChange={(e) => setNewTopicUrl(e.target.value)}
               />
@@ -780,6 +839,7 @@ export default function CategoryPage() {
             <label>Topic Name</label>
             <input
               type="text"
+              placeholder={placeholders.name}
               value={editTopicName}
               onChange={(e) => setEditTopicName(e.target.value)}
               required
@@ -790,7 +850,7 @@ export default function CategoryPage() {
               <label>Link / URL (Optional)</label>
               <input
                 type="url"
-                placeholder="e.g. https://leetcode.com/problems/..."
+                placeholder={placeholders.url}
                 value={editTopicUrl}
                 onChange={(e) => setEditTopicUrl(e.target.value)}
               />
@@ -883,6 +943,39 @@ export default function CategoryPage() {
             <button type="submit" className="btn btn-primary">Save Changes</button>
           </div>
         </form>
+      </Modal>
+
+      {/* Topic Notes Modal */}
+      <Modal
+        isOpen={showNotesModal}
+        onClose={() => setShowNotesModal(false)}
+        title={activeTopic ? `Notes: ${activeTopic.name}` : 'Topic Notes'}
+      >
+        <div className="notes-viewer-container">
+          <div className="notes-content-box">
+            {activeTopic?.notes ? (
+              <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
+                {activeTopic.notes}
+              </p>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                No notes for this topic yet.
+              </p>
+            )}
+          </div>
+          {activeTopic?.notes && (
+            <button
+              className="btn btn-secondary btn-sm"
+              style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}
+              onClick={() => {
+                navigator.clipboard.writeText(activeTopic.notes);
+                toast({ title: 'Success', message: 'Notes copied to clipboard!', type: 'success' });
+              }}
+            >
+              <ClipboardList size={14} /> Copy Notes
+            </button>
+          )}
+        </div>
       </Modal>
 
       {/* Revision Rating Modal */}

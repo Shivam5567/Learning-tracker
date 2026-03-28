@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getTodos, createTodo, updateTodo, deleteTodo } from '../api';
 import { formatDate } from '../utils/helpers';
+import { ClipboardList, Trash2 } from '../components/Icons';
 
 export default function TodoPage() {
   const [todos, setTodos] = useState([]);
@@ -151,7 +152,7 @@ export default function TodoPage() {
           <div className="todo-items">
             {activeTodos.length === 0 ? (
               <div className="empty-state" style={{ padding: '40px 0', minHeight: 'auto' }}>
-                <div className="empty-icon">📝</div>
+                <div className="empty-icon"><ClipboardList size={48} /></div>
                 <p>No tasks for this day yet.</p>
               </div>
             ) : (
@@ -167,7 +168,7 @@ export default function TodoPage() {
                   </label>
                   <span className="todo-text">{todo.text}</span>
                   <button className="delete-todo-btn" onClick={() => handleDelete(todo._id)} title="Delete task">
-                    🗑
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))

@@ -6,6 +6,7 @@ import Modal from '../components/Modal';
 import ActivityCalendar from '../components/ActivityCalendar';
 import ProgressRing from '../components/ProgressRing';
 import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
+import { Library, Zap, Calendar, Flame, Laptop, Calculator, FlaskConical, ClipboardList } from '../components/Icons';
 
 const PRESET_CATEGORIES = [
   { name: 'DSA', description: 'Data Structures & Algorithms', type: 'dsa' },
@@ -144,7 +145,7 @@ export default function Dashboard() {
 
       <div className="bento-main-grid">
          <div className="bento-main-left">
-            <h2 className="bento-section-title">📚 Your Subjects</h2>
+            <h2 className="bento-section-title"><Library size={20} style={{marginRight: '8px', verticalAlign: 'text-bottom'}} /> Your Subjects</h2>
             <div className="categories-grid slide-up" style={{ animationDelay: '0.1s' }}>
               {categories.map((category) => (
                 <CategoryCard
@@ -163,16 +164,16 @@ export default function Dashboard() {
          </div>
          
          <div className="bento-sidebar slide-up" style={{ animationDelay: '0.2s' }}>
-            <h2 className="bento-section-title">⚡ Priority Actions</h2>
+            <h2 className="bento-section-title"><Zap size={20} style={{marginRight: '8px', verticalAlign: 'text-bottom'}} /> Priority Actions</h2>
             <div className="bento-widget" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                <button className="btn btn-primary" style={{width: '100%', justifyContent: 'center'}} onClick={() => setShowModal(true)}>+ New Subject</button>
-               <button className="btn btn-secondary" style={{width: '100%', justifyContent: 'center'}} onClick={() => navigate('/todo')}>📝 Weekly Planner</button>
+               <button className="btn btn-secondary" style={{width: '100%', justifyContent: 'center'}} onClick={() => navigate('/todo')}><ClipboardList size={18} style={{marginRight: '8px'}} /> Weekly Planner</button>
             </div>
          </div>
       </div>
 
       <div className="slide-up" style={{ width: '100%', animationDelay: '0.3s' }}>
-         <h2 className="bento-section-title">🔥 Consistency Streak</h2>
+         <h2 className="bento-section-title"><Flame size={20} style={{marginRight: '8px', verticalAlign: 'text-bottom'}} /> Consistency Streak</h2>
          <div className="bento-widget" style={{ padding: '32px' }}>
             <ActivityCalendar />
          </div>
@@ -193,7 +194,7 @@ export default function Dashboard() {
                   onClick={() => handlePresetCreate(preset)}
                 >
                   <span className="preset-icon">
-                    {preset.name === 'DSA' ? '💻' : preset.name === 'Books' ? '📚' : preset.name === 'Theory Subjects' ? '🧮' : '🔬'}
+                    {preset.name === 'DSA' ? <Laptop size={20} /> : preset.name === 'Books' ? <Library size={20} /> : preset.name === 'Theory Subjects' ? <Calculator size={20} /> : <FlaskConical size={20} />}
                   </span>
                   <span>{preset.name}</span>
                 </button>

@@ -1822,18 +1822,28 @@ select {
   right: 24px;
   width: 280px;
   background: var(--bg-glass);
-  /* ← Replaced hardcoded dark background */
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
-  /* ← Now uses theme border */
   border-radius: var(--radius-lg);
   padding: 16px;
   box-shadow: var(--shadow-lg);
-  /* ← Uses theme shadow */
   z-index: 1000;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  user-select: none;
+  cursor: grab;
+}
+
+.pomodoro-widget.dragging {
+  cursor: grabbing !important;
+}
+
+/* Ensure buttons and tabs still show pointer */
+.pomodoro-widget button, 
+.pomodoro-widget input,
+.pomodoro-minimized svg {
+  cursor: pointer;
 }
 
 .pomo-header {
@@ -2030,9 +2040,13 @@ select {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
+  cursor: grab;
   transition: transform var(--transition-fast);
   color: var(--text-primary);
+}
+
+.pomodoro-minimized:active {
+  cursor: grabbing;
 }
 
 .pomodoro-minimized:hover {

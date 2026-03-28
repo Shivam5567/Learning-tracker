@@ -1,6 +1,7 @@
 import RevisionBadge from './RevisionBadge';
+import { Trophy, LinkIcon, Edit3, ClipboardList } from './Icons';
 
-export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, features = {} }) {
+export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, onShowNotes, features = {} }) {
   return (
     <div className="topic-row" onClick={() => onEdit(topic)}>
       <span className="topic-chevron">›</span>
@@ -18,7 +19,9 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, fe
       <span className={`topic-name ${topic.completed ? 'completed' : ''} ${topic.isMastered ? 'mastered' : ''}`}>
         {/* Mastery Trophy */}
         {topic.isMastered && (
-          <span className="mastery-trophy" title="Mastered! (365+ day interval)">🏆</span>
+          <span className="mastery-trophy" title="Mastered! (365+ day interval)">
+            <Trophy size={14} style={{ color: 'var(--warning)' }} />
+          </span>
         )}
 
         {/* DSA: Difficulty badge */}
@@ -48,7 +51,7 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, fe
 
         {topic.url ? (
           <a href={topic.url.startsWith('http') ? topic.url : `https://${topic.url}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>
-            {topic.name} <span style={{ fontSize: '0.85em', marginLeft: '6px', opacity: 0.8 }} title="Open link">🔗</span>
+            {topic.name} <LinkIcon size={12} style={{ marginLeft: '6px', opacity: 0.8 }} title="Open link" />
           </a>
         ) : (
           topic.name
@@ -60,7 +63,16 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, fe
           </span>
         )}
         {topic.notes && (
-          <span title={topic.notes} style={{ marginLeft: '8px', cursor: 'help', opacity: 0.9 }}>📝</span>
+          <button 
+            className="topic-notes-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onShowNotes(topic);
+            }}
+            title="View notes"
+          >
+            <ClipboardList size={14} />
+          </button>
         )}
       </span>
 
@@ -77,7 +89,7 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, fe
           }}
           title="Edit topic"
         >
-          ✏️
+          <Edit3 size={16} />
         </button>
         <button
           className="topic-delete"

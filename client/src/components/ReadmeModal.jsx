@@ -1,4 +1,5 @@
 import React from 'react';
+import { BookOpen, Calendar, Brain, Target, CheckCircle2, Trophy } from './Icons';
 
 const README_CONTENT = {
   routine: [
@@ -47,12 +48,12 @@ export default function ReadmeModal({ isOpen, onClose }) {
     <div className="search-overlay" onClick={onClose}>
       <div className="shortcuts-modal readme-modal" onClick={e => e.stopPropagation()}>
         <div className="shortcuts-header">
-          <h2>📖 Study Guide & System</h2>
+          <h2><BookOpen size={20} style={{marginRight: '10px'}} /> Study Guide & System</h2>
           <span className="shortcuts-close" onClick={onClose}>✕</span>
         </div>
         <div className="shortcuts-body readme-body">
           <section className="readme-section">
-            <h3 className="readme-title">🗓 Daily Study Routine</h3>
+            <h3 className="readme-title"><Calendar size={18} /> Daily Study Routine</h3>
             {README_CONTENT.routine.map((item, i) => (
               <div key={i} className="routine-item">
                 <h4>{item.title}</h4>
@@ -64,7 +65,7 @@ export default function ReadmeModal({ isOpen, onClose }) {
           </section>
 
           <section className="readme-section">
-            <h3 className="readme-title">🧠 Mindset Anchors</h3>
+            <h3 className="readme-title"><Brain size={18} /> Mindset Anchors</h3>
             <ul className="anchors-list">
               {README_CONTENT.anchors.map((anchor, i) => (
                 <li key={i}>{anchor}</li>
@@ -73,11 +74,11 @@ export default function ReadmeModal({ isOpen, onClose }) {
           </section>
 
           <section className="readme-section">
-            <h3 className="readme-title">🎯 System Guide</h3>
+            <h3 className="readme-title"><Target size={18} /> System Guide</h3>
             <div className="system-grid">
               {README_CONTENT.system.map((item, i) => (
                 <div key={i} className="system-item">
-                  <strong>{item.label}</strong>: {item.text}
+                  <strong>{item.label.includes('Mastery') ? <><Trophy size={14} style={{color: 'var(--warning)', marginRight: '4px'}} /> Mastery</> : item.label}</strong>: {item.text}
                 </div>
               ))}
             </div>
