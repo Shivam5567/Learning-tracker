@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-export default function Sidebar({ onSearchOpen }) {
+export default function Sidebar({ onSearchOpen, onReadmeOpen }) {
   const { logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -47,6 +47,14 @@ export default function Sidebar({ onSearchOpen }) {
         style={{ fontSize: '1.1rem' }}
       >
         {theme === 'dark' ? '🌞' : '🌙'}
+      </button>
+      <button 
+        className="sidebar-nav-item" 
+        onClick={onReadmeOpen}
+        title="Study Guide (Shift+R)"
+        style={{ fontSize: '1.1rem' }}
+      >
+        📖
       </button>
       <button className="sidebar-nav-item" style={{ fontSize: '1rem', color: 'var(--text-muted)' }}
         onClick={() => { const e = new KeyboardEvent('keydown', { key: '?', bubbles: true }); window.dispatchEvent(e); }}

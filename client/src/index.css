@@ -102,7 +102,7 @@
   --border: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 0, 0, 0.15);
 
-  --progress-bg: rgba(0, 0, 0, 0.05);
+  --progress-bg: rgba(0, 0, 0, 0.1);
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -3106,4 +3106,129 @@ button.sidebar-nav-item {
   gap: 16px;
   margin-left: auto;
   /* This pushes the count, bar, and buttons to the far right */
+}
+
+/* ==============================
+   README MODAL STYLES
+   ============================== */
+.readme-modal {
+  max-width: 650px;
+  max-height: 85vh;
+}
+
+.readme-body {
+  padding-top: 10px;
+}
+
+.readme-section {
+  margin-bottom: 32px;
+}
+
+.readme-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.routine-item {
+  margin-bottom: 20px;
+}
+
+.routine-item h4 {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.routine-item ul {
+  list-style: none;
+  padding-left: 12px;
+}
+
+.routine-item li {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  line-height: 1.5;
+  position: relative;
+}
+
+.routine-item li::before {
+  content: '•';
+  position: absolute;
+  left: -12px;
+  color: var(--accent-primary);
+}
+
+.anchors-list {
+  list-style: none;
+  padding: 0;
+}
+
+.anchors-list li {
+  background: rgba(230, 126, 34, 0.05);
+  border-left: 4px solid var(--accent-primary);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-style: italic;
+  animation: slideInLeft 0.4s ease backwards;
+}
+
+.anchors-list li:nth-child(2) { animation-delay: 0.1s; }
+.anchors-list li:nth-child(3) { animation-delay: 0.2s; }
+
+.system-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.system-item {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.system-item strong {
+  color: var(--text-primary);
+}
+
+/* ==============================
+   PROGRESS RING
+   ============================== */
+.progress-ring-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring-text {
+  position: absolute;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+.progress-ring-text.small { font-size: 0.85rem; }
+.progress-ring-text.medium { font-size: 1.2rem; }
+.progress-ring-text.large { font-size: 1.8rem; }
+
+@media (max-width: 768px) {
+  .readme-modal {
+    width: 95%;
+    margin: 10px;
+  }
 }

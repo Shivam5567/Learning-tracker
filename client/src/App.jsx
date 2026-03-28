@@ -12,6 +12,7 @@ import TodoPage from './pages/TodoPage';
 import PomodoroTimer from './components/PomodoroTimer';
 import GlobalSearch from './components/GlobalSearch';
 import ShortcutsModal from './components/ShortcutsModal';
+import ReadmeModal from './components/ReadmeModal';
 
 function RootRoute() {
   const { user, loading } = useAuth();
@@ -25,6 +26,7 @@ function ProtectedRoute({ children }) {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [readmeOpen, setReadmeOpen] = useState(false);
   const gKeyPending = useRef(false);
   const gTimer = useRef(null);
 
@@ -48,6 +50,14 @@ function ProtectedRoute({ children }) {
       if (key === 'escape') {
         setSearchOpen(false);
         setShortcutsOpen(false);
+        setReadmeOpen(false);
+        return;
+      }
+
+      // Shift+R or R → Readme (only Shift+R to avoid conflicts)
+      if (key === 'r' && e.shiftKey) {
+        e.preventDefault();
+        setReadmeOpen(prev => !prev);
         return;
       }
 
@@ -91,13 +101,17 @@ function ProtectedRoute({ children }) {
 
   return (
     <div className="app-layout">
-      <Sidebar onSearchOpen={() => setSearchOpen(true)} />
+      <Sidebar 
+        onSearchOpen={() => setSearchOpen(true)} 
+        onReadmeOpen={() => setReadmeOpen(true)}
+      />
       <main className="main-content">
         {children}
       </main>
       <PomodoroTimer />
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       <ShortcutsModal isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <ReadmeModal isOpen={readmeOpen} onClose={() => setReadmeOpen(false)} />
     </div>
   );
 }
