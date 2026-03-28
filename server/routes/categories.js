@@ -37,11 +37,15 @@ router.get('/:id', async (req, res) => {
 // @desc    Create a category
 router.post('/', async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, type } = req.body;
+    // Auto-detect type from preset name if not explicitly provided
+    const typeMap = { dsa: 'dsa', books: 'books', 'theory subjects': 'theory', practical: 'practical' };
+    const detectedType = type || typeMap[name.toLowerCase()] || 'custom';
     const category = await Category.create({
       user: req.user._id,
       name,
       description: description || '',
+      type: detectedType,
       sections: [],
     });
     res.status(201).json(category);
@@ -209,16 +213,56 @@ router.post('/:id/sections/:sectionId/topics', async (req, res) => {
       return res.status(404).json({ message: 'Section not found' });
     }
 
-    const { name, totalItems } = req.body;
+    const { name, totalItems, url, notes, difficulty, readingStatus, pagesRead, totalPages, priority, projectStatus } = req.body;
     section.topics.push({
       name,
-      totalItems: totalItems || 1,
+      totalItems: 1,
+      url: url || '',
+      notes: notes || '',
+      difficulty: difficulty || '',
+      readingStatus: readingStatus || '',
+      pagesRead: pagesRead || 0,
+      totalPages: totalPages || 0,
+      priority: priority || '',
+      projectStatus: projectStatus || '',
       completedItems: 0,
       completed: false,
     });
 
     await category.save();
     res.status(201).json(category);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @route   PUT /api/categories/:id/sections/:sectionId/topics/:topicId
+// @desc    Update a topic's metadata (name, totalItems, url, notes)
+router.put('/:id/sections/:sectionId/topics/:topicId', async (req, res) => {
+  try {
+    const category = await Category.findOne({ _id: req.params.id, user: req.user._id });
+    if (!category) return res.status(404).json({ message: 'Category not found' });
+
+    const section = category.sections.id(req.params.sectionId);
+    if (!section) return res.status(404).json({ message: 'Section not found' });
+
+    const topic = section.topics.id(req.params.topicId);
+    if (!topic) return res.status(404).json({ message: 'Topic not found' });
+
+    const { name, totalItems, url, notes, difficulty, readingStatus, pagesRead, totalPages, priority, projectStatus } = req.body;
+    if (name !== undefined) topic.name = name;
+    if (totalItems !== undefined) topic.totalItems = totalItems;
+    if (url !== undefined) topic.url = url;
+    if (notes !== undefined) topic.notes = notes;
+    if (difficulty !== undefined) topic.difficulty = difficulty;
+    if (readingStatus !== undefined) topic.readingStatus = readingStatus;
+    if (pagesRead !== undefined) topic.pagesRead = pagesRead;
+    if (totalPages !== undefined) topic.totalPages = totalPages;
+    if (priority !== undefined) topic.priority = priority;
+    if (projectStatus !== undefined) topic.projectStatus = projectStatus;
+
+    await category.save();
+    res.json(category);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

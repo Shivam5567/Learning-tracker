@@ -6,6 +6,7 @@ import {
   addSection,
   deleteSection,
   addTopic,
+  editTopic,
   deleteTopic,
   completeTopic,
   reviseTopic,
@@ -15,7 +16,11 @@ import {
 import ProgressRing from '../components/ProgressRing';
 import SectionAccordion from '../components/SectionAccordion';
 import Modal from '../components/Modal';
+import DsaStatsWidget from '../components/DsaStatsWidget';
 import { getProgressPercent, getRevisionLabel } from '../utils/helpers';
+import { getFeatures } from '../utils/categoryConfig';
+import { useToast } from '../context/ToastContext';
+import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
 
 const quotes = [
   { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
@@ -28,6 +33,7 @@ const quotes = [
 export default function CategoryPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -39,7 +45,28 @@ export default function CategoryPage() {
   const [activeSectionId, setActiveSectionId] = useState(null);
   const [newSectionName, setNewSectionName] = useState('');
   const [newTopicName, setNewTopicName] = useState('');
-  const [newTopicTotal, setNewTopicTotal] = useState(1);
+  const [newTopicUrl, setNewTopicUrl] = useState('');
+  const [newTopicNotes, setNewTopicNotes] = useState('');
+  const [newTopicDifficulty, setNewTopicDifficulty] = useState('Easy');
+  const [newReadingStatus, setNewReadingStatus] = useState('Not Started');
+  const [newPagesRead, setNewPagesRead] = useState(0);
+  const [newTotalPages, setNewTotalPages] = useState(0);
+  const [newPriority, setNewPriority] = useState('Medium');
+  const [newProjectStatus, setNewProjectStatus] = useState('Planning');
+
+  // Edit Topic Modal
+  const [showEditTopicModal, setShowEditTopicModal] = useState(false);
+  const [editingTopic, setEditingTopic] = useState(null);
+  const [editingSectionId, setEditingSectionId] = useState(null);
+  const [editTopicName, setEditTopicName] = useState('');
+  const [editTopicUrl, setEditTopicUrl] = useState('');
+  const [editTopicNotes, setEditTopicNotes] = useState('');
+  const [editTopicDifficulty, setEditTopicDifficulty] = useState('Easy');
+  const [editReadingStatus, setEditReadingStatus] = useState('Not Started');
+  const [editPagesRead, setEditPagesRead] = useState(0);
+  const [editTotalPages, setEditTotalPages] = useState(0);
+  const [editPriority, setEditPriority] = useState('Medium');
+  const [editProjectStatus, setEditProjectStatus] = useState('Planning');
 
   // Revision modal
   const [showRevisionModal, setShowRevisionModal] = useState(false);
@@ -53,12 +80,36 @@ export default function CategoryPage() {
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState('');
   const fileInputRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   const quote = useMemo(() => quotes[Math.floor(Math.random() * quotes.length)], []);
 
   useEffect(() => {
     fetchCategory();
   }, [id]);
+
+  // ---- Keyboard Shortcuts ----
+  const anyModalOpen = showSectionModal || showTopicModal || showEditTopicModal || showRevisionModal || showImportModal;
+
+  // N → Add topic to first section
+  useKeyboardShortcut('n', () => {
+    if (category?.sections?.length > 0) {
+      openAddTopic(category.sections[category.sections.length - 1]._id);
+    } else {
+      setShowSectionModal(true);
+    }
+  }, { disabled: anyModalOpen || !category });
+
+  // S → Add section
+  useKeyboardShortcut('s', () => setShowSectionModal(true), { disabled: anyModalOpen });
+
+  // F → Focus search
+  useKeyboardShortcut('f', () => searchInputRef.current?.focus(), { disabled: anyModalOpen });
+
+  // 1 → All filter, 2 → Revision Due filter
+  useKeyboardShortcut('1', () => setFilter('all'), { disabled: anyModalOpen });
+  useKeyboardShortcut('2', () => setFilter('revision'), { disabled: anyModalOpen });
+  // ----------------------------
 
   const fetchCategory = async () => {
     try {
@@ -79,25 +130,86 @@ export default function CategoryPage() {
       setNewSectionName('');
       setShowSectionModal(false);
       fetchCategory();
+      toast(`Section "${newSectionName}" added!`, 'success');
     } catch (err) {
       console.error(err);
+      toast('Failed to add section', 'error');
     }
   };
 
-  const handleAddTopic = async (e) => {
+  const handleAddTopic = async (e, keepOpen = false) => {
     e.preventDefault();
     if (!newTopicName.trim()) return;
+    const name = newTopicName;
     try {
       await addTopic(id, activeSectionId, {
-        name: newTopicName,
-        totalItems: parseInt(newTopicTotal) || 1,
+        name,
+        totalItems: 1,
+        url: newTopicUrl,
+        notes: newTopicNotes,
+        difficulty: newTopicDifficulty,
+        readingStatus: newReadingStatus,
+        pagesRead: newPagesRead,
+        totalPages: newTotalPages,
+        priority: newPriority,
+        projectStatus: newProjectStatus,
       });
       setNewTopicName('');
-      setNewTopicTotal(1);
-      setShowTopicModal(false);
+      setNewTopicUrl('');
+      setNewTopicNotes('');
+      setNewTopicDifficulty('Easy');
+      setNewReadingStatus('Not Started');
+      setNewPagesRead(0);
+      setNewTotalPages(0);
+      setNewPriority('Medium');
+      setNewProjectStatus('Planning');
+      if (!keepOpen) setShowTopicModal(false);
       fetchCategory();
+      toast(`"${name}" added!`, 'success');
     } catch (err) {
       console.error(err);
+      toast('Failed to add topic', 'error');
+    }
+  };
+
+  const openEditTopic = (topic, sectionId) => {
+    setEditingTopic(topic);
+    setEditingSectionId(sectionId);
+    setEditTopicName(topic.name);
+    setEditTopicUrl(topic.url || '');
+    setEditTopicNotes(topic.notes || '');
+    setEditTopicDifficulty(topic.difficulty || 'Easy');
+    setEditReadingStatus(topic.readingStatus || 'Not Started');
+    setEditPagesRead(topic.pagesRead || 0);
+    setEditTotalPages(topic.totalPages || 0);
+    setEditPriority(topic.priority || 'Medium');
+    setEditProjectStatus(topic.projectStatus || 'Planning');
+    setShowEditTopicModal(true);
+  };
+
+  const handleEditTopic = async (e) => {
+    e.preventDefault();
+    if (!editTopicName.trim()) return;
+    try {
+      await editTopic(id, editingSectionId, editingTopic._id, {
+        name: editTopicName,
+        totalItems: 1,
+        url: editTopicUrl,
+        notes: editTopicNotes,
+        difficulty: editTopicDifficulty,
+        readingStatus: editReadingStatus,
+        pagesRead: editPagesRead,
+        totalPages: editTotalPages,
+        priority: editPriority,
+        projectStatus: editProjectStatus,
+      });
+      setShowEditTopicModal(false);
+      setEditingTopic(null);
+      fetchCategory();
+      toast('Topic updated ✓', 'success');
+    } catch (err) {
+      console.error(err);
+      toast('Failed to update topic', 'error');
     }
   };
 
@@ -122,6 +234,7 @@ export default function CategoryPage() {
         quality: 4,
       });
       fetchCategory();
+      toast(topic.completed ? 'Marked incomplete' : 'Topic completed! ✓', topic.completed ? 'info' : 'success');
     } catch (err) {
       console.error(err);
     }
@@ -147,8 +260,10 @@ export default function CategoryPage() {
     try {
       await deleteTopic(id, sectionId, topic._id);
       fetchCategory();
+      toast(`"${topic.name}" deleted`, 'info');
     } catch (err) {
       console.error('Delete topic error:', err);
+      toast('Failed to delete topic', 'error');
     }
   };
 
@@ -157,8 +272,10 @@ export default function CategoryPage() {
       try {
         await deleteSection(id, sectionId);
         fetchCategory();
+        toast('Section deleted', 'info');
       } catch (err) {
         console.error('Delete section error:', err);
+        toast('Failed to delete section', 'error');
       }
     }
   };
@@ -323,7 +440,7 @@ export default function CategoryPage() {
     return (
       <div className="empty-state">
         <p>Category not found</p>
-        <button className="btn btn-primary" onClick={() => navigate('/')}>
+        <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>
           Back to Dashboard
         </button>
       </div>
@@ -361,6 +478,7 @@ export default function CategoryPage() {
   };
 
   const filteredSections = getFilteredSections();
+  const features = getFeatures(category);
 
   // Due topics for sidebar
   const allDueTopics = [];
@@ -377,126 +495,125 @@ export default function CategoryPage() {
   allDueTopics.sort((a, b) => new Date(a.nextReview) - new Date(b.nextReview));
 
   return (
-    <div className="category-page fade-in">
-      <div className="category-main">
-        {/* Header */}
-        <div className="category-header">
-          <div className="category-header-top">
-            <button className="back-btn" onClick={() => navigate('/')}>←</button>
-            <h1>{category.name}</h1>
-            <div className="category-header-actions">
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setShowImportModal(true)}
-              >
-                📥 Import
-              </button>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => setShowSectionModal(true)}
-              >
-                + Add Section
-              </button>
-            </div>
-          </div>
-
-          <div className="category-progress">
-            <ProgressRing progress={progress} size={72} strokeWidth={5} textSize="medium" />
-            <div className="category-progress-info">
-              <h3>Overall Progress</h3>
-              <div className="progress-text">
-                {completedTopics} <span>/ {totalTopics}</span>
-              </div>
-            </div>
+    <div className="bento-dashboard fade-in">
+      {/* Hero Header */}
+      <div className="bento-hero slide-up">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button onClick={() => navigate('/dashboard')} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: '44px', height: '44px', borderRadius: '50%', color: 'white', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>←</button>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px', background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{category.name}</h1>
+            <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '1rem' }}>{completedTopics} of {totalTopics} topics completed</p>
           </div>
         </div>
-
-        {/* Filters */}
-        <div className="category-filters">
-          <button
-            className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            All Topics
-          </button>
-          <button
-            className={`filter-tab ${filter === 'revision' ? 'active' : ''}`}
-            onClick={() => setFilter('revision')}
-          >
-            Revision Due
-          </button>
-          <input
-            type="text"
-            className="search-input"
-            placeholder="🔍 Search topics..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
-        {/* Sections */}
-        {filteredSections.length > 0 ? (
-          filteredSections.map((section) => (
-            <SectionAccordion
-              key={section._id}
-              section={section}
-              onToggleComplete={(topic) => handleToggleComplete(topic, section._id)}
-              onDeleteTopic={(topic) => handleDeleteTopic(topic, section._id)}
-              onAddTopic={openAddTopic}
-              onDeleteSection={handleDeleteSection}
-              onResetSection={handleResetSection}
-            />
-          ))
-        ) : (
-          <div className="empty-state">
-            <div className="empty-icon">📋</div>
-            <p>
-              {filter === 'revision'
-                ? 'No topics due for revision!'
-                : 'No sections yet. Add a section to get started.'}
-            </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <ProgressRing progress={progress} size={64} strokeWidth={5} textSize="small" />
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-secondary" onClick={() => setShowImportModal(true)}>📥 Import</button>
+            <button className="btn btn-primary" onClick={() => setShowSectionModal(true)}>+ Add Section</button>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Right Sidebar */}
-      <div className="category-sidebar">
-        {/* Progress Card */}
-        <div className="sidebar-card">
-          <h3>Progress</h3>
-          <div className="progress-donut-center">
-            <ProgressRing progress={progress} size={120} strokeWidth={8} textSize="large" />
+      {/* Two-Column Grid */}
+      <div className="bento-main-grid">
+        {/* Left Column — Filters + Sections */}
+        <div>
+          {/* Filters */}
+          <div className="category-filters">
+            <button
+              className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All Topics
+            </button>
+            {features.revision && (
+              <button
+                className={`filter-tab ${filter === 'revision' ? 'active' : ''}`}
+                onClick={() => setFilter('revision')}
+              >
+                Revision Due
+              </button>
+            )}
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="search-input"
+              placeholder="🔍 Search topics... (F)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-        </div>
 
-        {/* Upcoming Revisions */}
-        <div className="sidebar-card">
-          <h3>Upcoming Revisions</h3>
-          {allDueTopics.length > 0 ? (
-            <ul className="revision-list">
-              {allDueTopics.slice(0, 5).map((topic) => (
-                <li key={topic._id}>
-                  <span className="topic-name">{topic.name}</span>
-                  <span className={`revision-badge ${
-                    new Date(topic.nextReview) <= new Date() ? 'due' : 'upcoming'
-                  }`}>
-                    {getRevisionLabel(topic.nextReview)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+          {/* Sections */}
+          {filteredSections.length > 0 ? (
+            filteredSections.map((section) => (
+              <SectionAccordion
+                key={section._id}
+                section={section}
+                features={features}
+                onToggleComplete={(topic) => handleToggleComplete(topic, section._id)}
+                onDeleteTopic={(topic) => handleDeleteTopic(topic, section._id)}
+                onEditTopic={openEditTopic}
+                onAddTopic={openAddTopic}
+                onDeleteSection={handleDeleteSection}
+                onResetSection={handleResetSection}
+              />
+            ))
           ) : (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              Complete topics to see revision schedule
-            </p>
+            <div className="empty-state">
+              <div className="empty-icon">📋</div>
+              <p>
+                {filter === 'revision'
+                  ? 'No topics due for revision!'
+                  : 'No sections yet. Add a section to get started.'}
+              </p>
+            </div>
           )}
         </div>
 
-        {/* Quote */}
-        <div className="quote-card">
-          <div className="quote-mark">❝</div>
-          <div className="quote-text">{quote.text}</div>
-          <div className="quote-author">— {quote.author}</div>
+        {/* Right Sidebar */}
+        <div className="bento-sidebar">
+          {/* Progress Card */}
+          <div className="bento-widget">
+            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', color: 'var(--text-primary)' }}>Subject Mastery</h3>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <ProgressRing progress={progress} size={140} strokeWidth={10} textSize="large" />
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '16px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              Completed {completedTopics} out of {totalTopics} topics
+            </div>
+          </div>
+
+          {/* DSA Stats — only for difficulty-enabled categories */}
+          {features.difficulty && (
+            <DsaStatsWidget sections={category.sections} />
+          )}
+          {/* Upcoming Revisions — only for revision-enabled categories */}
+          {features.revision && (
+            <div className="bento-widget">
+              <h3 style={{ marginBottom: '16px', fontSize: '1.1rem', color: 'var(--text-primary)' }}>Upcoming Revisions</h3>
+              {allDueTopics.length > 0 ? (
+                <ul className="revision-list">
+                  {allDueTopics.slice(0, 5).map((topic) => (
+                    <li key={topic._id}>
+                      <span className="topic-name">{topic.name}</span>
+                      <span className={`revision-badge ${
+                        new Date(topic.nextReview) <= new Date() ? 'due' : 'upcoming'
+                      }`}>
+                        {getRevisionLabel(topic.nextReview)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  Complete topics to see revision schedule
+                </p>
+              )}
+            </div>
+          )}
+
+
         </div>
       </div>
 
@@ -535,21 +652,217 @@ export default function CategoryPage() {
               autoFocus
             />
           </div>
-          <div className="modal-field">
-            <label>Total Items</label>
-            <input
-              type="number"
-              min="1"
-              placeholder="Number of sub-items"
-              value={newTopicTotal}
-              onChange={(e) => setNewTopicTotal(e.target.value)}
-            />
-          </div>
+          {features.url && (
+            <div className="modal-field">
+              <label>Link / URL (Optional)</label>
+              <input
+                type="url"
+                placeholder="e.g. https://leetcode.com/problems/..."
+                value={newTopicUrl}
+                onChange={(e) => setNewTopicUrl(e.target.value)}
+              />
+            </div>
+          )}
+          {features.notes && (
+            <div className="modal-field">
+              <label>Notes (Optional)</label>
+              <textarea
+                placeholder="Jot down approaches or things to remember..."
+                value={newTopicNotes}
+                onChange={(e) => setNewTopicNotes(e.target.value)}
+                rows="3"
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'inherit' }}
+              />
+            </div>
+          )}
+          {features.difficulty && (
+            <div className="modal-field">
+              <label>Difficulty</label>
+              <select
+                value={newTopicDifficulty}
+                onChange={(e) => setNewTopicDifficulty(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              >
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+          )}
+          {features.readingStatus && (
+            <div className="modal-field">
+              <label>Reading Status</label>
+              <select
+                value={newReadingStatus}
+                onChange={(e) => setNewReadingStatus(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              >
+                <option value="Not Started">Not Started</option>
+                <option value="Reading">Reading</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          )}
+          {features.pagesRead && (
+            <div className="modal-field" style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ flex: 1 }}>
+                <label>Pages Read</label>
+                <input type="number" min="0" value={newPagesRead} onChange={(e) => setNewPagesRead(Number(e.target.value))} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label>Total Pages</label>
+                <input type="number" min="0" value={newTotalPages} onChange={(e) => setNewTotalPages(Number(e.target.value))} />
+              </div>
+            </div>
+          )}
+          {features.priority && (
+            <div className="modal-field">
+              <label>Priority</label>
+              <select
+                value={newPriority}
+                onChange={(e) => setNewPriority(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          )}
+          {features.projectStatus && (
+            <div className="modal-field">
+              <label>Project Status</label>
+              <select
+                value={newProjectStatus}
+                onChange={(e) => setNewProjectStatus(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              >
+                <option value="Planning">Planning</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+              </select>
+            </div>
+          )}
           <div className="modal-actions">
             <button type="button" className="btn btn-secondary" onClick={() => setShowTopicModal(false)}>
               Cancel
             </button>
+            <button type="button" className="btn btn-secondary" onClick={(e) => handleAddTopic(e, true)}>
+              + Add Another
+            </button>
             <button type="submit" className="btn btn-primary">Add Topic</button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Topic Modal */}
+      <Modal isOpen={showEditTopicModal} onClose={() => setShowEditTopicModal(false)} title="Edit Topic">
+        <form onSubmit={handleEditTopic}>
+          <div className="modal-field">
+            <label>Topic Name</label>
+            <input
+              type="text"
+              value={editTopicName}
+              onChange={(e) => setEditTopicName(e.target.value)}
+              required
+            />
+          </div>
+          {features.url && (
+            <div className="modal-field">
+              <label>Link / URL (Optional)</label>
+              <input
+                type="url"
+                placeholder="e.g. https://leetcode.com/problems/..."
+                value={editTopicUrl}
+                onChange={(e) => setEditTopicUrl(e.target.value)}
+              />
+            </div>
+          )}
+          {features.notes && (
+            <div className="modal-field">
+              <label>Notes (Optional)</label>
+              <textarea
+                placeholder="Jot down approaches or things to remember..."
+                value={editTopicNotes}
+                onChange={(e) => setEditTopicNotes(e.target.value)}
+                rows="3"
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'inherit' }}
+              />
+            </div>
+          )}
+          {features.difficulty && (
+            <div className="modal-field">
+              <label>Difficulty</label>
+              <select
+                value={editTopicDifficulty}
+                onChange={(e) => setEditTopicDifficulty(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              >
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+          )}
+          {features.readingStatus && (
+            <div className="modal-field">
+              <label>Reading Status</label>
+              <select
+                value={editReadingStatus}
+                onChange={(e) => setEditReadingStatus(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              >
+                <option value="Not Started">Not Started</option>
+                <option value="Reading">Reading</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          )}
+          {features.pagesRead && (
+            <div className="modal-field" style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ flex: 1 }}>
+                <label>Pages Read</label>
+                <input type="number" min="0" value={editPagesRead} onChange={(e) => setEditPagesRead(Number(e.target.value))} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label>Total Pages</label>
+                <input type="number" min="0" value={editTotalPages} onChange={(e) => setEditTotalPages(Number(e.target.value))} />
+              </div>
+            </div>
+          )}
+          {features.priority && (
+            <div className="modal-field">
+              <label>Priority</label>
+              <select
+                value={editPriority}
+                onChange={(e) => setEditPriority(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          )}
+          {features.projectStatus && (
+            <div className="modal-field">
+              <label>Project Status</label>
+              <select
+                value={editProjectStatus}
+                onChange={(e) => setEditProjectStatus(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+              >
+                <option value="Planning">Planning</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+              </select>
+            </div>
+          )}
+          <div className="modal-actions">
+            <button type="button" className="btn btn-secondary" onClick={() => setShowEditTopicModal(false)}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary">Save Changes</button>
           </div>
         </form>
       </Modal>

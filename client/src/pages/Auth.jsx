@@ -29,7 +29,7 @@ export default function Auth() {
         }
         await registerUser(name, email, password);
       }
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
     } finally {

@@ -14,6 +14,46 @@ const topicSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  url: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  notes: {
+    type: String,
+    default: '',
+  },
+  // DSA-specific
+  difficulty: {
+    type: String,
+    enum: ['Easy', 'Medium', 'Hard', ''],
+    default: '',
+  },
+  // Books-specific
+  readingStatus: {
+    type: String,
+    enum: ['Not Started', 'Reading', 'Completed', ''],
+    default: '',
+  },
+  pagesRead: {
+    type: Number,
+    default: 0,
+  },
+  totalPages: {
+    type: Number,
+    default: 0,
+  },
+  // Practical-specific
+  priority: {
+    type: String,
+    enum: ['Low', 'Medium', 'High', ''],
+    default: '',
+  },
+  projectStatus: {
+    type: String,
+    enum: ['Planning', 'In Progress', 'Done', ''],
+    default: '',
+  },
   completed: {
     type: Boolean,
     default: false,
@@ -65,6 +105,11 @@ const categorySchema = new mongoose.Schema({
     type: String,
     default: '',
     trim: true,
+  },
+  type: {
+    type: String,
+    enum: ['dsa', 'books', 'theory', 'practical', 'custom'],
+    default: 'custom',
   },
   sections: [sectionSchema],
 }, {

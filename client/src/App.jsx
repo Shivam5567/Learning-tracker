@@ -1,14 +1,81 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import Auth from './pages/Auth';
 import TodoPage from './pages/TodoPage';
 import PomodoroTimer from './components/PomodoroTimer';
+import GlobalSearch from './components/GlobalSearch';
+import ShortcutsModal from './components/ShortcutsModal';
+
+function RootRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="spinner-container"><div className="spinner" /></div>;
+  if (user) return <Navigate to="/dashboard" />;
+  return <Home />;
+}
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const gKeyPending = useRef(false);
+  const gTimer = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      // Ignore when typing in inputs
+      const tag = e.target.tagName;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+      if (e.target.isContentEditable) return;
+
+      const key = e.key.toLowerCase();
+
+      // Ctrl+K → Search
+      if ((e.ctrlKey || e.metaKey) && key === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+        return;
+      }
+
+      // Esc → close any overlay
+      if (key === 'escape') {
+        setSearchOpen(false);
+        setShortcutsOpen(false);
+        return;
+      }
+
+      // ? → Shortcuts help
+      if (key === '?') {
+        e.preventDefault();
+        setShortcutsOpen(prev => !prev);
+        return;
+      }
+
+      // G+D → Dashboard, G+T → Todo (sequence shortcuts)
+      if (key === 'g') {
+        gKeyPending.current = true;
+        clearTimeout(gTimer.current);
+        gTimer.current = setTimeout(() => { gKeyPending.current = false; }, 1000);
+        return;
+      }
+      if (gKeyPending.current) {
+        gKeyPending.current = false;
+        clearTimeout(gTimer.current);
+        if (key === 'd') { e.preventDefault(); navigate('/dashboard'); }
+        if (key === 't') { e.preventDefault(); navigate('/todo'); }
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [navigate]);
 
   if (loading) {
     return (
@@ -24,50 +91,59 @@ function ProtectedRoute({ children }) {
 
   return (
     <div className="app-layout">
-      <Sidebar />
+      <Sidebar onSearchOpen={() => setSearchOpen(true)} />
       <main className="main-content">
         {children}
       </main>
       <PomodoroTimer />
+      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <ShortcutsModal isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   );
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Auth />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/todo"
-            element={
-              <ProtectedRoute>
-                <TodoPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/category/:id"
-            element={
-              <ProtectedRoute>
-                <CategoryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<Auth />} />
+              <Route path="/" element={<RootRoute />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/todo"
+                element={
+                  <ProtectedRoute>
+                    <TodoPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/category/:id"
+                element={
+                  <ProtectedRoute>
+                    <CategoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </Router>
+        </ToastProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
+
 export default App;
+

@@ -4,12 +4,14 @@ import { getCategories, createCategory, deleteCategory, getDueTopics } from '../
 import CategoryCard from '../components/CategoryCard';
 import Modal from '../components/Modal';
 import ActivityCalendar from '../components/ActivityCalendar';
+import ProgressRing from '../components/ProgressRing';
+import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
 
 const PRESET_CATEGORIES = [
-  { name: 'DSA', description: 'Data Structures & Algorithms' },
-  { name: 'Books', description: 'Book reading tracker' },
-  { name: 'Theory Subjects', description: 'CS theory & fundamentals' },
-  { name: 'Practical', description: 'Hands-on projects & labs' },
+  { name: 'DSA', description: 'Data Structures & Algorithms', type: 'dsa' },
+  { name: 'Books', description: 'Book reading tracker', type: 'books' },
+  { name: 'Theory Subjects', description: 'CS theory & fundamentals', type: 'theory' },
+  { name: 'Practical', description: 'Hands-on projects & labs', type: 'practical' },
 ];
 
 export default function Dashboard() {
@@ -24,6 +26,9 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Keyboard shortcut: N → New Category
+  useKeyboardShortcut('n', () => setShowModal(true), { disabled: showModal });
 
   const fetchData = async () => {
     try {
@@ -90,6 +95,12 @@ export default function Dashboard() {
     p => !existingNames.includes(p.name.toLowerCase())
   );
 
+  // Date and Greeting Logic
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+  const formattedDate = new Date().toLocaleDateString('en-US', dateOptions);
+
   if (loading) {
     return (
       <div className="spinner-container">
@@ -99,50 +110,73 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="dashboard fade-in">
-      <div className="dashboard-header">
-        <h1>Learning Tracker</h1>
-        <p>Track your progress and revise efficiently with spaced repetition</p>
-      </div>
-
-      <div className="dashboard-stats">
-        <div className="stat-card slide-up">
-          <div className="stat-value">{categories.length}</div>
-          <div className="stat-label">Categories</div>
+    <div className="bento-dashboard fade-in">
+      <div className="bento-hero slide-up">
+        <div className="bento-hero-left">
+          <div className="date-display">{formattedDate}</div>
+          <h1>{greeting}, Learner.</h1>
+          <p>Ready to continue your journey?</p>
         </div>
-        <div className="stat-card slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="stat-value">{totalTopics}</div>
-          <div className="stat-label">Total Topics</div>
-        </div>
-        <div className="stat-card slide-up" style={{ animationDelay: '0.2s' }}>
-          <div className="stat-value">{overallProgress}%</div>
-          <div className="stat-label">Overall Progress</div>
-        </div>
-        <div className="stat-card slide-up" style={{ animationDelay: '0.3s' }}>
-          <div className="stat-value" style={{ color: dueCount > 0 ? '#e74c3c' : 'var(--success)' }}>
-            {dueCount}
-          </div>
-          <div className="stat-label">Due for Revision</div>
-        </div>
-      </div>
-
-      <div className="categories-grid">
-        {categories.map((category) => (
-          <CategoryCard
-            key={category._id}
-            category={category}
-            onClick={() => navigate(`/category/${category._id}`)}
-            onDelete={handleDeleteCategory}
-          />
-        ))}
-
-        <div className="category-card add-new" onClick={() => setShowModal(true)}>
-          <div className="add-icon">+</div>
-          <span>Add New Category</span>
+        <div className="bento-hero-right">
+           <div className="bento-stat-group">
+              <div className="bento-mini-stat">
+                <span className="value">{categories.length}</span>
+                <span className="label">Categories</span>
+              </div>
+              <div className="bento-mini-stat">
+                <span className="value">{totalTopics}</span>
+                <span className="label">Total Topics</span>
+              </div>
+           </div>
+           <div className="bento-stat-group">
+              <div className="bento-mini-stat">
+                <span className="value" style={{color: dueCount > 0 ? 'var(--warning)' : 'var(--text-primary)'}}>{dueCount}</span>
+                <span className="label">Due Revision</span>
+              </div>
+              <div className="bento-mini-stat">
+                <span className="value">{overallProgress}%</span>
+                <span className="label">Mastered</span>
+              </div>
+           </div>
+           <ProgressRing progress={overallProgress} size={120} strokeWidth={8} textSize="large" />
         </div>
       </div>
 
-      <ActivityCalendar />
+      <div className="bento-main-grid">
+         <div className="bento-main-left">
+            <h2 className="bento-section-title">📚 Your Subjects</h2>
+            <div className="categories-grid slide-up" style={{ animationDelay: '0.1s' }}>
+              {categories.map((category) => (
+                <CategoryCard
+                  key={category._id}
+                  category={category}
+                  onClick={() => navigate(`/category/${category._id}`)}
+                  onDelete={handleDeleteCategory}
+                />
+              ))}
+
+              <div className="category-card add-new" onClick={() => setShowModal(true)}>
+                <div className="add-icon">+</div>
+                <span>Add New Category</span>
+              </div>
+            </div>
+         </div>
+         
+         <div className="bento-sidebar slide-up" style={{ animationDelay: '0.2s' }}>
+            <h2 className="bento-section-title">⚡ Priority Actions</h2>
+            <div className="bento-widget" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+               <button className="btn btn-primary" style={{width: '100%', justifyContent: 'center'}} onClick={() => setShowModal(true)}>+ New Subject</button>
+               <button className="btn btn-secondary" style={{width: '100%', justifyContent: 'center'}} onClick={() => navigate('/todo')}>📝 Weekly Planner</button>
+            </div>
+         </div>
+      </div>
+
+      <div className="slide-up" style={{ width: '100%', animationDelay: '0.3s' }}>
+         <h2 className="bento-section-title">🔥 Consistency Streak</h2>
+         <div className="bento-widget" style={{ padding: '32px' }}>
+            <ActivityCalendar />
+         </div>
+      </div>
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Create New Category">
         {/* Preset Categories */}

@@ -33,6 +33,7 @@ export const resetSection = (categoryId, sectionId) => API.put(`/categories/${ca
 
 // Topics
 export const addTopic = (categoryId, sectionId, data) => API.post(`/categories/${categoryId}/sections/${sectionId}/topics`, data);
+export const editTopic = (categoryId, sectionId, topicId, data) => API.put(`/categories/${categoryId}/sections/${sectionId}/topics/${topicId}`, data);
 export const deleteTopic = (categoryId, sectionId, topicId) => API.delete(`/categories/${categoryId}/sections/${sectionId}/topics/${topicId}`);
 
 // Topic actions
