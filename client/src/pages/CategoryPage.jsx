@@ -480,7 +480,7 @@ export default function CategoryPage() {
     }
 
     return { ...section, topics: filteredTopics };
-  }).filter(section => section.topics.length > 0);
+  }).filter(section => section.topics.length > 0 || (filter === 'all' && !searchQuery));
 
   const features = getFeatures(category);
 
