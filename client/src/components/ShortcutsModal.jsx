@@ -1,7 +1,3 @@
-/**
- * ShortcutsModal — shows a beautiful reference card of all keyboard shortcuts.
- * Press ? to open it from anywhere in the app.
- */
 
 const SHORTCUT_GROUPS = [
   {

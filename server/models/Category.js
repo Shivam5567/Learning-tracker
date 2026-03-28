@@ -79,6 +79,10 @@ const topicSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  isMastered: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 const sectionSchema = new mongoose.Schema({

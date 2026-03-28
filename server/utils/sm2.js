@@ -2,14 +2,21 @@
  * SM-2 Spaced Repetition Algorithm
  * 
  * Quality ratings:
- *   0 - Complete blackout
- *   1 - Incorrect, but recognized upon seeing answer
- *   2 - Incorrect, but answer seemed easy to recall
- *   3 - Correct, but with significant difficulty
- *   4 - Correct, after some hesitation
  *   5 - Perfect response
+ *   4 - Correct, after some hesitation
+ *   3 - Correct, but with significant difficulty
+ *   2 - Incorrect, but answer seemed easy to recall (Second Chance)
+ *   1 - Incorrect, but recognized upon seeing answer
+ *   0 - Complete blackout
  */
 
+/**
+ * Calculates the next repetition interval and ease factor based on the SM-2 algorithm.
+ * 
+ * @param {Object} topic - Current topic state { easeFactor, interval, repetitions }
+ * @param {number} quality - User-provided rating (0-5)
+ * @returns {Object} Updated topic state and next review date
+ */
 function calculateSM2(topic, quality) {
   let { easeFactor = 2.5, interval = 0, repetitions = 0 } = topic;
 
@@ -17,30 +24,42 @@ function calculateSM2(topic, quality) {
   quality = Math.max(0, Math.min(5, Math.round(quality)));
 
   if (quality >= 3) {
-    // Correct response
+    // ---- Successful Repetition ----
     if (repetitions === 0) {
-      interval = 1; // 1 day
+      interval = 1; // 1st successful repetition: 1 day
     } else if (repetitions === 1) {
-      interval = 6; // 6 days
+      // 2nd successful repetition: Dynamic Scaling based on quality
+      if (quality === 5) interval = 6;
+      else if (quality === 4) interval = 4;
+      else if (quality === 3) interval = 2;
     } else {
+      // 3rd+ successful repetition: Scale by Ease Factor
       interval = Math.round(interval * easeFactor);
     }
     repetitions += 1;
+  } else if (quality === 2) {
+    // ---- Edge Case: Quality 2 (Second Chance) ----
+    // Do not reset history completely. Give a quick second chance tomorrow.
+    repetitions = 1; 
+    interval = 1;
   } else {
-    // Incorrect response — reset
+    // ---- Failed Repetition (0 or 1) ----
     repetitions = 0;
     interval = 1;
   }
 
-  // Update ease factor
+  // Update Ease Factor using standard SM-2 formula
+  // EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
   easeFactor = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
 
-  // Ease factor should not go below 1.3
-  if (easeFactor < 1.3) {
-    easeFactor = 1.3;
-  }
+  // Safety Limits for Ease Factor
+  if (easeFactor < 1.3) easeFactor = 1.3; // Minimum Floor to avoid "Ease Hell"
+  if (easeFactor > 5.0) easeFactor = 5.0; // Maximum Cap
 
-  // Calculate next review date — set to start of day so revision is available the whole day
+  // Mastery Threshold (1 Year)
+  const isMastered = interval >= 365;
+
+  // Calculate next review date (set to start of the day)
   const nextReview = new Date();
   nextReview.setDate(nextReview.getDate() + interval);
   nextReview.setHours(0, 0, 0, 0);
@@ -50,12 +69,16 @@ function calculateSM2(topic, quality) {
     interval,
     repetitions,
     nextReview,
+    isMastered,
     lastReviewed: new Date(),
   };
 }
 
 /**
- * Get a human-readable label for when the next revision is due
+ * Get a refined, human-readable label for when the next revision is due.
+ * 
+ * @param {Date|string} nextReview - The scheduled next review date
+ * @returns {string|null}
  */
 function getRevisionLabel(nextReview) {
   if (!nextReview) return null;
@@ -69,10 +92,12 @@ function getRevisionLabel(nextReview) {
   const diffTime = reviewDay - today;
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays <= 0) return 'Due today!';
+  if (diffDays < 0) return 'Past Due';
+  if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Tomorrow';
   if (diffDays <= 7) return `In ${diffDays} days`;
   if (diffDays <= 30) return `In ${Math.ceil(diffDays / 7)} weeks`;
+  
   return `In ${Math.ceil(diffDays / 30)} months`;
 }
 

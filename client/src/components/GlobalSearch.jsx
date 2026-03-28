@@ -11,7 +11,6 @@ export default function GlobalSearch({ isOpen, onClose }) {
   const inputRef = useRef(null);
   const navigate = useNavigate();
 
-  // Load all categories when opened
   useEffect(() => {
     if (isOpen) {
       setQuery('');

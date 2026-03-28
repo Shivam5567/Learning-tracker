@@ -15,7 +15,12 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, fe
         {topic.completed && '✓'}
       </div>
 
-      <span className={`topic-name ${topic.completed ? 'completed' : ''}`}>
+      <span className={`topic-name ${topic.completed ? 'completed' : ''} ${topic.isMastered ? 'mastered' : ''}`}>
+        {/* Mastery Trophy */}
+        {topic.isMastered && (
+          <span className="mastery-trophy" title="Mastered! (365+ day interval)">🏆</span>
+        )}
+
         {/* DSA: Difficulty badge */}
         {features.difficulty && topic.difficulty && (
           <span className={`difficulty-badge difficulty-${topic.difficulty.toLowerCase()}`}>

@@ -787,7 +787,7 @@ select {
   justify-content: center;
   margin-right: 12px;
   color: var(--text-muted);
-  transition: transform var(--transition-normal);
+  transition: transform var(--transition-fast);
   font-size: 14px;
 }
 
@@ -830,7 +830,7 @@ select {
 .section-body {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s ease;
+  transition: max-height var(--transition-normal);
 }
 
 .section-body.expanded {
@@ -2838,6 +2838,29 @@ select {
   animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
   max-width: 320px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Mastery Trophy & Topic Styling */
+.mastery-trophy {
+  margin-right: 8px;
+  font-size: 1.1rem;
+  display: inline-block;
+  animation: tropyBounce 2s infinite ease-in-out;
+}
+
+@keyframes tropyBounce {
+  0%, 100% { transform: translateY(0) scale(1.1); }
+  50% { transform: translateY(-3px) scale(1.2); }
+}
+
+.topic-name.mastered {
+  color: #e6db74; /* Gold-ish color */
+  font-weight: 700;
+}
+
+.topic-name.mastered.completed {
+  opacity: 1;
+  text-decoration: none;
 }
 
 @keyframes toastIn {

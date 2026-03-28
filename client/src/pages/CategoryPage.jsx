@@ -449,45 +449,49 @@ export default function CategoryPage() {
 
   const totalTopics = category.totalTopics || 0;
   const completedTopics = category.completedTopics || 0;
-  const progress = getProgressPercent(completedTopics, totalTopics);
+  const masteredTopics = category.sections.reduce((sum, s) => sum + s.topics.filter(t => t.isMastered).length, 0);
+  const progress = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
-  // Filter sections for revision due
-  const getFilteredSections = () => {
-    let sections = category.sections || [];
+  const DIFFICULTY_ORDER = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
+  const now = new Date();
+  const filteredSections = category.sections.map(section => {
+    // 1. Filter topics based on tab and search
+    let filteredTopics = section.topics.filter(topic => {
+      const matchesSearch = topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
 
-    if (searchQuery) {
-      sections = sections.map(section => ({
-        ...section,
-        topics: section.topics.filter(t =>
-          t.name.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-      })).filter(s => s.topics.length > 0);
+      if (filter === 'revision') {
+        const isDue = topic.completed && topic.nextReview && !topic.isMastered && new Date(topic.nextReview) <= now;
+        return isDue;
+      }
+      if (filter === 'mastered') {
+        return topic.isMastered;
+      }
+      return true; // 'all'
+    });
+
+    // 2. Sort topics by difficulty if category is DSA
+    if (category.type === 'dsa') {
+      filteredTopics.sort((a, b) => {
+        const orderA = DIFFICULTY_ORDER[a.difficulty] || 99;
+        const orderB = DIFFICULTY_ORDER[b.difficulty] || 99;
+        return orderA - orderB;
+      });
     }
 
-    if (filter === 'revision') {
-      const now = new Date();
-      sections = sections.map(section => ({
-        ...section,
-        topics: section.topics.filter(t =>
-          t.completed && t.nextReview && new Date(t.nextReview) <= now
-        ),
-      })).filter(s => s.topics.length > 0);
-    }
+    return { ...section, topics: filteredTopics };
+  }).filter(section => section.topics.length > 0);
 
-    return sections;
-  };
-
-  const filteredSections = getFilteredSections();
   const features = getFeatures(category);
 
-  // Due topics for sidebar
+  // For the "Upcoming Revisions" sidebar widget
   const allDueTopics = [];
-  (category.sections || []).forEach(section => {
-    section.topics.forEach(topic => {
-      if (topic.completed && topic.nextReview) {
+  category.sections.forEach(s => {
+    s.topics.forEach(t => {
+      if (t.completed && t.nextReview && !t.isMastered) {
         allDueTopics.push({
-          ...topic,
-          sectionName: section.name,
+          ...t,
+          sectionName: s.name,
         });
       }
     });
@@ -502,7 +506,9 @@ export default function CategoryPage() {
           <button onClick={() => navigate('/dashboard')} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: '44px', height: '44px', borderRadius: '50%', color: 'white', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>←</button>
           <div>
             <h1 style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px', background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{category.name}</h1>
-            <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '1rem' }}>{completedTopics} of {totalTopics} topics completed</p>
+            <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '1rem' }}>
+              {completedTopics} of {totalTopics} completed • {masteredTopics} Mastered 🏆
+            </p>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -527,12 +533,20 @@ export default function CategoryPage() {
               All Topics
             </button>
             {features.revision && (
-              <button
-                className={`filter-tab ${filter === 'revision' ? 'active' : ''}`}
-                onClick={() => setFilter('revision')}
-              >
-                Revision Due
-              </button>
+              <>
+                <button
+                  className={`filter-tab ${filter === 'revision' ? 'active' : ''}`}
+                  onClick={() => setFilter('revision')}
+                >
+                  Revision Due
+                </button>
+                <button
+                  className={`filter-tab ${filter === 'mastered' ? 'active' : ''}`}
+                  onClick={() => setFilter('mastered')}
+                >
+                  Mastered 🏆
+                </button>
+              </>
             )}
             <input
               ref={searchInputRef}
@@ -561,10 +575,14 @@ export default function CategoryPage() {
             ))
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">📋</div>
+              <div className="empty-icon">
+                {filter === 'revision' ? '✅' : filter === 'mastered' ? '🏆' : '📋'}
+              </div>
               <p>
                 {filter === 'revision'
-                  ? 'No topics due for revision!'
+                  ? 'All caught up! No topics due for revision.'
+                  : filter === 'mastered'
+                  ? 'No topics mastered yet. Keep practicing!'
                   : 'No sections yet. Add a section to get started.'}
               </p>
             </div>

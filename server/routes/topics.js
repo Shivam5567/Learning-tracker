@@ -42,6 +42,7 @@ router.put('/complete', async (req, res) => {
       topic.repetitions = sm2Result.repetitions;
       topic.nextReview = sm2Result.nextReview;
       topic.lastReviewed = sm2Result.lastReviewed;
+      topic.isMastered = sm2Result.isMastered;
 
       // Log review history
       await ReviewHistory.create({
@@ -63,6 +64,7 @@ router.put('/complete', async (req, res) => {
       topic.easeFactor = 2.5;
       topic.interval = 0;
       topic.repetitions = 0;
+      topic.isMastered = false;
     }
 
     await category.save();
@@ -100,6 +102,7 @@ router.put('/revise', async (req, res) => {
     topic.repetitions = sm2Result.repetitions;
     topic.nextReview = sm2Result.nextReview;
     topic.lastReviewed = sm2Result.lastReviewed;
+    topic.isMastered = sm2Result.isMastered;
 
     // Log review history
     await ReviewHistory.create({
@@ -133,7 +136,7 @@ router.get('/due', async (req, res) => {
     categories.forEach(category => {
       category.sections.forEach(section => {
         section.topics.forEach(topic => {
-          if (topic.completed && topic.nextReview && new Date(topic.nextReview) <= endOfToday) {
+          if (topic.completed && topic.nextReview && !topic.isMastered && new Date(topic.nextReview) <= endOfToday) {
             dueTopics.push({
               categoryId: category._id,
               categoryName: category.name,
