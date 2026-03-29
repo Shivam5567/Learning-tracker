@@ -10,7 +10,7 @@ export default function Sidebar({ onSearchOpen, onReadmeOpen }) {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate('/login');
   };
 
   return (

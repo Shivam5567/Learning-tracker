@@ -5,7 +5,6 @@ import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
-import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import Auth from './pages/Auth';
 import TodoPage from './pages/TodoPage';
@@ -15,10 +14,9 @@ import ShortcutsModal from './components/ShortcutsModal';
 import ReadmeModal from './components/ReadmeModal';
 
 function RootRoute() {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   if (loading) return <div className="spinner-container"><div className="spinner" /></div>;
-  if (user) return <Navigate to="/dashboard" />;
-  return <Home />;
+  return <Navigate to="/dashboard" />;
 }
 
 function ProtectedRoute({ children }) {

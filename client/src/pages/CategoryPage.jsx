@@ -10,6 +10,7 @@ import ProgressRing from '../components/ProgressRing';
 import SectionAccordion from '../components/SectionAccordion';
 import Modal from '../components/Modal';
 import DsaStatsWidget from '../components/DsaStatsWidget';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import { getProgressPercent, getRevisionLabel } from '../utils/helpers';
 import { getFeatures } from '../utils/categoryConfig';
 import { useToast } from '../context/ToastContext';
@@ -35,6 +36,13 @@ export default function CategoryPage() {
   // Modals
   const [showSectionModal, setShowSectionModal] = useState(false);
   const [showTopicModal, setShowTopicModal] = useState(false);
+  const [showEditTopicModal, setShowEditTopicModal] = useState(false);
+  const [showAddPreview, setShowAddPreview] = useState(false);
+  const [showEditPreview, setShowEditPreview] = useState(false);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showRevisionModal, setShowRevisionModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  
   const [activeSectionId, setActiveSectionId] = useState(null);
   const [newSectionName, setNewSectionName] = useState('');
   const [newTopicName, setNewTopicName] = useState('');
@@ -47,8 +55,7 @@ export default function CategoryPage() {
   const [newPriority, setNewPriority] = useState('Medium');
   const [newProjectStatus, setNewProjectStatus] = useState('Planning');
 
-  // Edit Topic Modal
-  const [showEditTopicModal, setShowEditTopicModal] = useState(false);
+  // Edit Topic State
   const [editingTopic, setEditingTopic] = useState(null);
   const [editingSectionId, setEditingSectionId] = useState(null);
   const [editTopicName, setEditTopicName] = useState('');
@@ -61,14 +68,11 @@ export default function CategoryPage() {
   const [editPriority, setEditPriority] = useState('Medium');
   const [editProjectStatus, setEditProjectStatus] = useState('Planning');
 
-  // Revision modal
-  const [showRevisionModal, setShowRevisionModal] = useState(false);
+  // Revision State
   const [revisionTopic, setRevisionTopic] = useState(null);
   const [revisionSectionId, setRevisionSectionId] = useState(null);
 
-  // Import modal
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showNotesModal, setShowNotesModal] = useState(false);
+  // Notes & Import State
   const [activeTopic, setActiveTopic] = useState(null);
   const [importData, setImportData] = useState(null);
   const [importError, setImportError] = useState('');
@@ -750,14 +754,29 @@ export default function CategoryPage() {
           )}
           {features.notes && (
             <div className="modal-field">
-              <label>Notes (Optional)</label>
-              <textarea
-                placeholder="Jot down approaches or things to remember..."
-                value={newTopicNotes}
-                onChange={(e) => setNewTopicNotes(e.target.value)}
-                rows="3"
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'inherit' }}
-              />
+              <div className="flex justify-between items-center mb-2">
+                <label className="m-0">Notes (Optional)</label>
+                <button 
+                  type="button" 
+                  className={`text-[0.75rem] px-2 py-0.5 rounded border transition-colors ${showAddPreview ? 'bg-accent-primary text-white border-accent-primary' : 'bg-transparent text-customText-muted border-border hover:text-customText-primary'}`}
+                  onClick={() => setShowAddPreview(!showAddPreview)}
+                >
+                  {showAddPreview ? 'Edit' : 'Preview Markdown'}
+                </button>
+              </div>
+              {showAddPreview ? (
+                <div className="notes-content-box mb-3 min-h-[100px] max-h-[200px] overflow-y-auto">
+                  <MarkdownRenderer content={newTopicNotes || '*No notes to preview*'} />
+                </div>
+              ) : (
+                <textarea
+                  placeholder="Jot down approaches or things to remember... (Markdown supported)"
+                  value={newTopicNotes}
+                  onChange={(e) => setNewTopicNotes(e.target.value)}
+                  rows="4"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'inherit' }}
+                />
+              )}
             </div>
           )}
           {features.difficulty && (
@@ -866,14 +885,29 @@ export default function CategoryPage() {
           )}
           {features.notes && (
             <div className="modal-field">
-              <label>Notes (Optional)</label>
-              <textarea
-                placeholder="Jot down approaches or things to remember..."
-                value={editTopicNotes}
-                onChange={(e) => setEditTopicNotes(e.target.value)}
-                rows="3"
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'inherit' }}
-              />
+              <div className="flex justify-between items-center mb-2">
+                <label className="m-0">Notes (Optional)</label>
+                <button 
+                  type="button" 
+                  className={`text-[0.75rem] px-2 py-0.5 rounded border transition-colors ${showEditPreview ? 'bg-accent-primary text-white border-accent-primary' : 'bg-transparent text-customText-muted border-border hover:text-customText-primary'}`}
+                  onClick={() => setShowEditPreview(!showEditPreview)}
+                >
+                  {showEditPreview ? 'Edit' : 'Preview Markdown'}
+                </button>
+              </div>
+              {showEditPreview ? (
+                <div className="notes-content-box mb-3 min-h-[100px] max-h-[200px] overflow-y-auto">
+                  <MarkdownRenderer content={editTopicNotes || '*No notes to preview*'} />
+                </div>
+              ) : (
+                <textarea
+                  placeholder="Jot down approaches or things to remember... (Markdown supported)"
+                  value={editTopicNotes}
+                  onChange={(e) => setEditTopicNotes(e.target.value)}
+                  rows="4"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical', fontFamily: 'inherit' }}
+                />
+              )}
             </div>
           )}
           {features.difficulty && (
@@ -962,9 +996,7 @@ export default function CategoryPage() {
         <div className="notes-viewer-container">
           <div className="notes-content-box">
             {activeTopic?.notes ? (
-              <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
-                {activeTopic.notes}
-              </p>
+              <MarkdownRenderer content={activeTopic.notes} />
             ) : (
               <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
                 No notes for this topic yet.
