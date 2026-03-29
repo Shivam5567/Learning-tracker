@@ -35,11 +35,15 @@ app.use((err, req, res, next) => {
 });
 
 // Serve frontend in production
-if (process.env.NODE_ENV === 'production' || true) {
+if (process.env.NODE_ENV === 'production') {
   // Set static folder
   app.use(express.static(path.join(__dirname, '../client/dist')));
 
   app.get('*', (req, res) => {
+    // Only serve index.html for actual routes, not for missing files (like .png / .webmanifest)
+    if (req.url.includes('.')) {
+      return res.status(404).json({ message: 'File not found' });
+    }
     res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
   });
 }

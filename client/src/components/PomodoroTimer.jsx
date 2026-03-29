@@ -6,14 +6,28 @@ const MODES = {
   LONG_BREAK: { name: 'Long Break', minutes: 15, color: '#3498db' },
   CUSTOM: { name: 'Custom', minutes: 45, color: '#9b59b6' },
 };
-
 const AMBIENT_SOUNDS = [
   { id: 'none', name: 'None', icon: '🔇' },
-  { id: 'rain', name: 'Cozy Storm', icon: '⛈️', url: 'https://assets.mixkit.co/active_storage/sfx/2436/2436-preview.mp3' },
-  { id: 'forest', name: 'Mountain Stream', icon: '🌊', url: 'https://assets.mixkit.co/active_storage/sfx/2429/2429-preview.mp3' },
-  { id: 'piano', name: 'Healing Piano', icon: '🎹', url: 'https://cdn.pixabay.com/audio/2022/10/30/audio_245209f9f8.mp3' },
+  {
+    id: 'rain',
+    name: 'Cozy Storm',
+    icon: '⛈️',
+    url: 'https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg'
+  },
+  {
+    id: 'forest',
+    name: 'Mountain Stream',
+    icon: '🌊',
+    url: 'https://actions.google.com/sounds/v1/water/small_stream_flowing.ogg'
+  },
+  {
+    id: 'piano',
+    name: 'Deep Thunder',
+    icon: '🌩️',
+    // This lives in the SAME folder as your working 'rain' link
+    url: 'https://actions.google.com/sounds/v1/weather/rolling_thunder.ogg'
+  },
 ];
-
 export default function PomodoroTimer() {
   const [mode, setMode] = useState(MODES.POMODORO);
   const [customMinutes, setCustomMinutes] = useState(MODES.CUSTOM.minutes);
@@ -99,8 +113,8 @@ export default function PomodoroTimer() {
 
   const playBeep = () => {
     try {
-      const audio = new Audio("../src/assets/mixkit-happy-bells-notification-937.wav"); // path to your file
-      audio.volume = 0.5; // 0 to 1
+      const audio = new Audio("https://orangefreesounds.com/wp-content/uploads/2024/01/Beep-beep-notification-sound.mp3");
+      audio.volume = 0.5;
       audio.play();
     } catch (e) {
       console.log('Audio not supported', e);
