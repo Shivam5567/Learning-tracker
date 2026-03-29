@@ -1,0 +1,16 @@
+{
+  "name": "learning-tracker-root",
+  "version": "1.0.0",
+  "description": "Root for Learning Tracker MERN app",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "build": "npm install --prefix client && npm run build --prefix client && npm install --prefix server",
+    "client-install": "npm install --prefix client",
+    "server-install": "npm install --prefix server",
+    "install-all": "npm run client-install && npm run server-install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
