@@ -12,6 +12,8 @@ import PomodoroTimer from './components/PomodoroTimer';
 import GlobalSearch from './components/GlobalSearch';
 import ShortcutsModal from './components/ShortcutsModal';
 import ReadmeModal from './components/ReadmeModal';
+import ErrorBoundary from './components/ErrorBoundary';
+
 
 function RootRoute() {
   const { loading } = useAuth();
@@ -116,43 +118,46 @@ function ProtectedRoute({ children }) {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<Auth />} />
-              <Route path="/" element={<RootRoute />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/todo"
-                element={
-                  <ProtectedRoute>
-                    <TodoPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/category/:id"
-                element={
-                  <ProtectedRoute>
-                    <CategoryPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </Router>
-        </ToastProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <Router>
+              <Routes>
+                <Route path="/login" element={<Auth />} />
+                <Route path="/" element={<RootRoute />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/todo"
+                  element={
+                    <ProtectedRoute>
+                      <TodoPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/category/:id"
+                  element={
+                    <ProtectedRoute>
+                      <CategoryPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+            </Router>
+          </ToastProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+
   );
 }
 

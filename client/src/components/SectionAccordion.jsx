@@ -38,7 +38,7 @@ export default function SectionAccordion({
           </div>
 
           {/* Sleek SVG Action Buttons */}
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
             {completedCount > 0 && (
               <button
                 className="w-8 h-8 rounded-md bg-transparent text-customText-muted flex items-center justify-center cursor-pointer transition-all duration-200 border-none hover:bg-white/10 hover:text-warning"

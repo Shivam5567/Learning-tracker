@@ -8,6 +8,8 @@ import ActivityCalendar from '../components/ActivityCalendar';
 import ProgressRing from '../components/ProgressRing';
 import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
 import { Library, Zap, Calendar, Flame, Laptop, Calculator, FlaskConical, ClipboardList } from '../components/Icons';
+import { useToast } from '../context/ToastContext';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const PRESET_CATEGORIES = [
   { name: 'DSA', description: 'Data Structures & Algorithms', type: 'dsa' },
@@ -24,7 +26,10 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchData();
@@ -76,15 +81,23 @@ export default function Dashboard() {
     }
   };
 
-  const handleDeleteCategory = async (categoryId) => {
-    if (window.confirm('Are you sure you want to delete this category? All its sections and topics will be permanently lost.')) {
-      try {
-        await deleteCategory(categoryId);
-        fetchData();
-      } catch (err) {
-        console.error('Delete category error:', err);
-        alert(err.response?.data?.message || 'Failed to delete category');
-      }
+  const handleDeleteCategory = (categoryId) => {
+    setCategoryToDelete(categoryId);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!categoryToDelete) return;
+    try {
+      await deleteCategory(categoryToDelete);
+      fetchData();
+      toast('Category deleted successfully', 'info');
+    } catch (err) {
+      console.error('Delete category error:', err);
+      toast(err.response?.data?.message || 'Failed to delete category', 'error');
+    } finally {
+      setCategoryToDelete(null);
+      setShowConfirm(false);
     }
   };
 
@@ -241,6 +254,16 @@ export default function Dashboard() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={confirmDelete}
+        title="Delete Category?"
+        message="Are you sure you want to delete this category? All its sections and topics will be permanently lost."
+        confirmText="Delete"
+        confirmVariant="danger"
+      />
     </div>
   );
 }

@@ -27,7 +27,7 @@ export default function CategoryCard({ category, onClick, onDelete }) {
           <span className="text-customText-primary font-bold">{category.completedTopics || 0}</span> / {category.totalTopics || 0} topics
         </span>
         <button
-          className="border-none bg-transparent text-customText-muted cursor-pointer p-1.5 rounded-md opacity-0 transition-all duration-200 group-hover:opacity-100 hover:!text-danger hover:bg-[#e74c3c]/10"
+          className="border-none bg-transparent text-customText-muted cursor-pointer p-1.5 rounded-md opacity-100 md:opacity-0 transition-all duration-200 md:group-hover:opacity-100 hover:!text-danger hover:bg-[#e74c3c]/10"
           style={{ position: 'relative', zIndex: 10 }}
           onClick={handleDelete}
           title="Delete category"

@@ -9,6 +9,7 @@ import { Trophy, Upload, ClipboardList, CheckCircle2, Edit3, Library, Search, Ba
 import ProgressRing from '../components/ProgressRing';
 import SectionAccordion from '../components/SectionAccordion';
 import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
 import DsaStatsWidget from '../components/DsaStatsWidget';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import { getProgressPercent, getRevisionLabel } from '../utils/helpers';
@@ -78,6 +79,14 @@ export default function CategoryPage() {
   const [importError, setImportError] = useState('');
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState('');
+  const [confirmState, setConfirmState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    confirmText: 'Confirm',
+    confirmVariant: 'primary',
+  });
   const fileInputRef = useRef(null);
   const searchInputRef = useRef(null);
 
@@ -274,39 +283,64 @@ export default function CategoryPage() {
     }
   };
 
-  const handleDeleteTopic = async (topic, sectionId) => {
-    try {
-      await deleteTopic(id, sectionId, topic._id);
-      fetchCategory();
-      toast(`"${topic.name}" deleted`, 'info');
-    } catch (err) {
-      console.error('Delete topic error:', err);
-      toast('Failed to delete topic', 'error');
-    }
+  const handleDeleteTopic = (topic, sectionId) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Delete Topic?',
+      message: `Are you sure you want to delete "${topic.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteTopic(id, sectionId, topic._id);
+          fetchCategory();
+          toast(`"${topic.name}" deleted`, 'info');
+        } catch (err) {
+          console.error('Delete topic error:', err);
+          toast('Failed to delete topic', 'error');
+        }
+      }
+    });
   };
 
-  const handleDeleteSection = async (sectionId) => {
-    if (window.confirm('Are you sure you want to delete this section and all its topics?')) {
-      try {
-        await deleteSection(id, sectionId);
-        fetchCategory();
-        toast('Section deleted', 'info');
-      } catch (err) {
-        console.error('Delete section error:', err);
-        toast('Failed to delete section', 'error');
+  const handleDeleteSection = (sectionId) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Delete Section?',
+      message: 'Are you sure you want to delete this section and all its topics? This is permanent.',
+      confirmText: 'Delete Section',
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteSection(id, sectionId);
+          fetchCategory();
+          toast('Section deleted', 'info');
+        } catch (err) {
+          console.error('Delete section error:', err);
+          toast('Failed to delete section', 'error');
+        }
       }
-    }
+    });
   };
 
-  const handleResetSection = async (sectionId) => {
-    if (window.confirm('Are you sure you want to reset all progress in this section?')) {
-      try {
-        await resetSection(id, sectionId);
-        fetchCategory();
-      } catch (err) {
-        console.error('Reset section error:', err);
+  const handleResetSection = (sectionId) => {
+    setConfirmState({
+      isOpen: true,
+      title: 'Reset Section Progress?',
+      message: 'Are you sure you want to reset all progress in this section? This will unmark all completed topics and reset revision intervals.',
+      confirmText: 'Reset Progress',
+      confirmVariant: 'warning',
+      onConfirm: async () => {
+        try {
+          await resetSection(id, sectionId);
+          fetchCategory();
+          toast('Section progress reset', 'info');
+        } catch (err) {
+          console.error('Reset section error:', err);
+          toast('Failed to reset section', 'error');
+        }
       }
-    }
+    });
   };
 
   const openAddTopic = (sectionId) => {
@@ -1152,6 +1186,17 @@ export default function CategoryPage() {
           </div>
         )}
       </Modal>
+
+      {/* Reusable Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        onClose={() => setConfirmState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmText={confirmState.confirmText}
+        confirmVariant={confirmState.confirmVariant}
+      />
     </div>
   );
 }

@@ -82,7 +82,7 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, on
 
       <div className="flex gap-1 ml-auto">
         <button
-          className="w-7 h-7 flex items-center justify-center rounded-sm bg-transparent border-none text-customText-muted cursor-pointer opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-white/10 hover:text-customText-primary"
+          className="w-7 h-7 flex items-center justify-center rounded-sm bg-transparent border-none text-customText-muted cursor-pointer opacity-100 md:opacity-0 transition-all duration-200 md:group-hover:opacity-100 hover:bg-white/10 hover:text-customText-primary"
           onClick={(e) => {
             e.stopPropagation();
             onEdit(topic);
@@ -92,7 +92,7 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, on
           <Edit3 size={16} />
         </button>
         <button
-          className="w-7 h-7 flex items-center justify-center rounded-sm bg-transparent border-none text-customText-muted cursor-pointer opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-white/10 hover:text-danger font-bold text-lg"
+          className="w-7 h-7 flex items-center justify-center rounded-sm bg-transparent border-none text-customText-muted cursor-pointer opacity-100 md:opacity-0 transition-all duration-200 md:group-hover:opacity-100 hover:bg-white/10 hover:text-danger font-bold text-lg"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(topic);
