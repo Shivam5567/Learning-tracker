@@ -1,8 +1,8 @@
 import React from 'react';
-import { BarChart3, CheckCircle2 } from './Icons';
+import { CheckCircle2 } from './Icons';
 
 /**
- * DSA Stats Widget — shows Easy/Medium/Hard breakdown for DSA categories.
+ * DSA Stats Widget — shows Easy/Medium/Hard breakdown for DSA categories mirroring LeetCode.
  */
 export default function DsaStatsWidget({ sections }) {
   const stats = { Easy: { done: 0, total: 0 }, Medium: { done: 0, total: 0 }, Hard: { done: 0, total: 0 } };
@@ -18,49 +18,72 @@ export default function DsaStatsWidget({ sections }) {
   });
 
   const config = [
-    { key: 'Easy', color: 'var(--success)', bg: 'rgba(46,204,113,0.15)' },
-    { key: 'Medium', color: 'var(--warning)', bg: 'rgba(241,196,15,0.15)' },
-    { key: 'Hard', color: 'var(--danger)', bg: 'rgba(231,76,60,0.15)' },
+    { key: 'Easy', color: 'var(--success)', bg: 'rgba(46, 204, 113, 0.15)', borderRounding: 'rounded-l-[12px]' },
+    { key: 'Medium', color: 'var(--warning)', bg: 'rgba(241, 196, 15, 0.15)', borderRounding: '' },
+    { key: 'Hard', color: 'var(--danger)', bg: 'rgba(231, 76, 60, 0.15)', borderRounding: 'rounded-r-[12px]' },
   ];
 
   const totalDone = Object.values(stats).reduce((s, v) => s + v.done, 0);
   const totalAll = Object.values(stats).reduce((s, v) => s + v.total, 0);
 
   return (
-    <div className="bento-widget">
-      <h3 style={{ marginBottom: '16px', fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
-        <BarChart3 size={18} style={{marginRight: '8px'}} /> Problem Breakdown
-      </h3>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-        {config.map(({ key, color, bg }) => (
-          <div key={key} style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ background: bg, border: `1px solid ${color}30`, borderRadius: '8px', padding: '8px 4px' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color }}>{stats[key].done}</div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{key}</div>
+    <div className="bg-card border border-border rounded-[16px] p-6 shadow-sm flex flex-col gap-6">
+      
+      {/* Top 3 Blocks */}
+      <div>
+        <div className="flex w-full">
+          {config.map(({ key, color, bg, borderRounding }) => (
+            <div 
+              key={key} 
+              className={`flex-1 flex flex-col items-center justify-center py-[22px] transition-transform duration-300 hover:scale-[1.02] ${borderRounding}`}
+              style={{ backgroundColor: bg }}
+            >
+              <div className="text-[1.8rem] font-black leading-none mb-2" style={{ color }}>{stats[key].done}</div>
+              <div className="text-[0.65rem] text-customText-secondary font-bold tracking-[1px] uppercase">{key}</div>
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>/ {stats[key].total}</div>
-          </div>
-        ))}
+          ))}
+        </div>
+        
+        {/* The '/ X' labels below the blocks */}
+        <div className="flex w-full mt-3">
+          {config.map(({ key }) => (
+            <div key={`${key}-total`} className="flex-1 text-center text-[0.85rem] text-customText-muted font-medium">
+              / {stats[key].total}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {config.map(({ key, color }) => {
-        const pct = stats[key].total > 0 ? Math.round((stats[key].done / stats[key].total) * 100) : 0;
-        return (
-          <div key={key} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>{key}</span>
-              <span style={{ color, fontWeight: 600 }}>{pct}%</span>
+      {/* Progress Bars */}
+      <div className="flex flex-col gap-[18px]">
+        {config.map(({ key, color }) => {
+          const pct = stats[key].total > 0 ? Math.round((stats[key].done / stats[key].total) * 100) : 0;
+          return (
+            <div key={`${key}-bar`}>
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-[0.9rem] text-customText-secondary">{key}</span>
+                <span className="text-[0.85rem] font-bold" style={{ color }}>{pct}%</span>
+              </div>
+              <div className="h-[6px] w-full bg-border rounded-full overflow-hidden">
+                <div 
+                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  style={{ width: `${pct}%`, backgroundColor: color }}
+                />
+              </div>
             </div>
-            <div style={{ height: '6px', background: 'var(--border)', borderRadius: '99px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: '99px', transition: 'width 0.6s ease' }} />
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
-      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-secondary)', alignItems: 'center' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center' }}><CheckCircle2 size={16} style={{marginRight: '8px'}} /> Total solved</span>
-        <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{totalDone} / {totalAll}</span>
+      {/* Footer */}
+      <div className="pt-5 border-t border-border flex justify-between items-center">
+        <div className="flex items-center text-customText-secondary font-medium text-[0.95rem] gap-[8px]">
+          <CheckCircle2 size={18} />
+          Total solved
+        </div>
+        <div className="font-extrabold text-[1.1rem] text-customText-primary tracking-tight">
+          {totalDone} <span className="text-customText-muted mx-1 text-[0.95rem] font-semibold">/</span> {totalAll}
+        </div>
       </div>
     </div>
   );

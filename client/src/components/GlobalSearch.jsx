@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCategories } from '../api';
+import { Search, Folder, CheckCircle, Circle, ChevronRight } from './Icons';
 
 export default function GlobalSearch({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
@@ -90,8 +91,10 @@ export default function GlobalSearch({ isOpen, onClose }) {
   return (
     <div className="search-overlay" onClick={onClose}>
       <div className="search-modal" onClick={e => e.stopPropagation()}>
-        <div className="search-input-row">
-          <span className="search-icon">🔍</span>
+        <div className="search-input-row flex items-center gap-3">
+          <span className="search-icon flex items-center justify-center text-customText-muted">
+            <Search size={22} />
+          </span>
           <input
             ref={inputRef}
             className="search-global-input"
@@ -121,7 +124,9 @@ export default function GlobalSearch({ isOpen, onClose }) {
               >
                 {r.isCategoryMatch ? (
                   <>
-                    <span className="search-result-icon">📂</span>
+                    <span className="search-result-icon flex items-center justify-center text-accent-primary">
+                      <Folder size={18} />
+                    </span>
                     <div className="search-result-info">
                       <span className="search-result-title">{r.categoryName}</span>
                       <span className="search-result-sub">Category</span>
@@ -129,7 +134,9 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   </>
                 ) : (
                   <>
-                    <span className="search-result-icon">{r.topicCompleted ? '✅' : '⬜'}</span>
+                    <span className={`search-result-icon flex items-center justify-center ${r.topicCompleted ? 'text-accent-primary' : 'text-customText-muted opacity-50'}`}>
+                      {r.topicCompleted ? <CheckCircle size={18} /> : <Circle size={18} />}
+                    </span>
                     <div className="search-result-info">
                       <span className="search-result-title">
                         {r.topicDifficulty && (
@@ -143,7 +150,9 @@ export default function GlobalSearch({ isOpen, onClose }) {
                     </div>
                   </>
                 )}
-                <span className="search-result-arrow">→</span>
+                <span className="search-result-arrow flex items-center text-customText-muted opacity-50">
+                  <ChevronRight size={18} />
+                </span>
               </li>
             ))}
           </ul>

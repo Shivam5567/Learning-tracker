@@ -12,7 +12,7 @@ export default function PomodoroTimer() {
   const [customMinutes, setCustomMinutes] = useState(MODES.CUSTOM.minutes);
   const [timeLeft, setTimeLeft] = useState(MODES.POMODORO.minutes * 60);
   const [isRunning, setIsRunning] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
@@ -156,7 +156,7 @@ export default function PomodoroTimer() {
   if (isMinimized) {
     return (
       <div 
-        className={`pomodoro-minimized slide-up ${isDragging ? 'dragging' : ''}`}
+        className={`fixed bottom-[72px] md:bottom-6 right-6 bg-glass backdrop-blur-md border-2 border-border rounded-full py-2 px-4 shadow-md z-[1000] flex items-center gap-2 cursor-grab transition-transform duration-150 hover:scale-105 active:cursor-grabbing text-customText-primary animate-[slideUp_0.3s_ease] ${isDragging ? '!cursor-grabbing' : ''}`}
         onClick={() => !hasMoved.current && setIsMinimized(false)}
         onMouseDown={handleMouseDown}
         style={{ 
@@ -165,11 +165,11 @@ export default function PomodoroTimer() {
           transition: isDragging ? 'none' : 'transform 0.2s ease'
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={mode.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="cursor-pointer" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={mode.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
-        <span className="pomo-mini-time" style={{ color: mode.color }}>
+        <span className="font-bold tabular-nums text-[0.95rem]" style={{ color: mode.color }}>
           {formatTime(timeLeft)}
         </span>
       </div>
@@ -183,26 +183,26 @@ export default function PomodoroTimer() {
 
   return (
     <div 
-      className={`pomodoro-widget slide-up ${isDragging ? 'dragging' : ''}`}
+      className={`fixed bottom-[72px] md:bottom-6 right-6 w-[280px] bg-glass backdrop-blur-md border border-border rounded-2xl p-4 shadow-lg z-[1000] flex flex-col gap-4 select-none cursor-grab animate-[slideUp_0.3s_ease] ${isDragging ? '!cursor-grabbing' : ''}`}
       onMouseDown={handleMouseDown}
       style={{ 
         transform: `translate(${position.x}px, ${position.y}px)`,
         transition: isDragging ? 'none' : 'transform 0.2s ease'
       }}
     >
-      <div className="pomo-header">
-        <div className="pomo-tabs">
+      <div className="flex justify-between items-center">
+        <div className="flex gap-1 bg-progress-bg p-1 rounded-sm">
           {Object.values(MODES).map((m) => (
             <button
               key={m.name}
-              className={`pomo-tab ${mode.name === m.name ? 'active' : ''}`}
+              className={`flex-1 bg-transparent border-none text-customText-muted text-[0.75rem] px-2 py-1 rounded-sm cursor-pointer transition-all duration-150 hover:text-customText-primary ${mode.name === m.name ? '!bg-card !text-customText-primary font-medium shadow-sm' : ''}`}
               onClick={() => switchMode(m)}
             >
               {m.name}
             </button>
           ))}
         </div>
-        <button className="pomo-minimize-btn" onClick={() => setIsMinimized(true)} title="Minimize">
+        <button className="bg-transparent border-none text-customText-muted cursor-pointer p-1 flex items-center justify-center transition-colors duration-150 hover:text-customText-primary" onClick={() => setIsMinimized(true)} title="Minimize">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="4 14 10 14 10 20"></polyline>
             <polyline points="20 10 14 10 14 4"></polyline>
@@ -212,15 +212,15 @@ export default function PomodoroTimer() {
         </button>
       </div>
 
-      <div className="pomo-body">
-        <div className="pomo-circle-container">
-          <svg className="pomo-circle-svg" width="100" height="100">
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative w-[100px] h-[100px] flex items-center justify-center">
+          <svg className="absolute top-0 left-0 -rotate-90 pointer-events-none" width="100" height="100">
             <circle
-              className="pomo-circle-bg"
+              className="fill-none stroke-border stroke-[6px]"
               cx="50" cy="50" r={radius}
             />
             <circle
-              className="pomo-circle-progress"
+              className="fill-none stroke-[6px] transition-[stroke-dashoffset] duration-[1s] ease-linear transition-colors duration-300 stroke-linecap-round"
               cx="50" cy="50" r={radius}
               style={{
                 strokeDasharray: circumference,
@@ -229,14 +229,14 @@ export default function PomodoroTimer() {
               }}
             />
           </svg>
-          <div className="pomo-time-display">
+          <div className="text-[1.8rem] font-bold tabular-nums z-[2] flex items-center justify-center text-customText-primary">
             {mode.name === 'Custom' && !isRunning ? (
-              <div className="pomo-custom-input-wrapper">
+              <div className="flex items-baseline gap-[2px]">
                 <input
                   type="number"
                   min="1"
                   max="999"
-                  className="pomo-custom-input"
+                  className="w-[48px] bg-transparent border-none border-b-2 border-customText-muted text-customText-primary text-[1.6rem] font-bold text-center p-0 outline-none transition-colors duration-150 focus:border-accent-primary [&::-webkit-inner-spin-button]:appearance-none cursor-pointer"
                   value={customMinutes || ''}
                   onChange={(e) => {
                     const val = parseInt(e.target.value) || 0;
@@ -245,7 +245,7 @@ export default function PomodoroTimer() {
                   }}
                   autoFocus
                 />
-                <span className="pomo-custom-label">m</span>
+                <span className="text-[1rem] text-customText-muted">m</span>
               </div>
             ) : (
               formatTime(timeLeft)
@@ -253,8 +253,8 @@ export default function PomodoroTimer() {
           </div>
         </div>
 
-        <div className="pomo-controls">
-          <button className={`pomo-btn ${isRunning ? 'pause' : 'play'}`} onClick={toggleTimer}>
+        <div className="flex items-center gap-4">
+          <button className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 border-none ${isRunning ? 'bg-accent-primary text-white hover:bg-accent-secondary' : 'bg-input border border-border text-customText-primary hover:bg-border hover:scale-105'}`} onClick={toggleTimer}>
             {isRunning ? (
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <rect x="6" y="4" width="4" height="16"></rect>
@@ -267,7 +267,7 @@ export default function PomodoroTimer() {
             )}
           </button>
           
-          <button className="pomo-btn reset" onClick={resetTimer} title="Reset">
+          <button className="w-10 h-10 rounded-full bg-input border border-border text-customText-primary flex items-center justify-center cursor-pointer transition-all duration-150 hover:bg-border hover:scale-105" onClick={resetTimer} title="Reset">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
               <path d="M3 3v5h5"></path>

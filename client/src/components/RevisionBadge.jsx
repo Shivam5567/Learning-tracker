@@ -10,12 +10,12 @@ export default function RevisionBadge({ nextReview }) {
   const reviewDate = new Date(nextReview);
   const diffDays = Math.ceil((reviewDate - now) / (1000 * 60 * 60 * 24));
 
-  let badgeClass = 'later';
-  if (diffDays <= 0) badgeClass = 'due';
-  else if (diffDays <= 3) badgeClass = 'upcoming';
+  let badgeClass = 'bg-[#9e9e9e]/10 text-customText-muted';
+  if (diffDays <= 0) badgeClass = 'bg-[#e74c3c]/10 text-danger';
+  else if (diffDays <= 3) badgeClass = 'bg-[#3498db]/10 text-info';
 
   return (
-    <span className={`revision-badge ${badgeClass}`}>
+    <span className={`px-2.5 py-1 rounded-full text-[0.75rem] font-bold tracking-[0.5px] uppercase ${badgeClass}`}>
       🔄 {label}
     </span>
   );

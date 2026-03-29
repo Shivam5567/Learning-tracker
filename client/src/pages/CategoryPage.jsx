@@ -457,8 +457,8 @@ export default function CategoryPage() {
 
   if (!category) {
     return (
-      <div className="empty-state">
-        <p>Category not found</p>
+      <div className="text-center py-16 px-5 text-customText-muted">
+        <p className="text-[1rem] mb-5">Category not found</p>
         <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>
           Back to Dashboard
         </button>
@@ -518,7 +518,7 @@ export default function CategoryPage() {
   allDueTopics.sort((a, b) => new Date(a.nextReview) - new Date(b.nextReview));
 
   return (
-    <div className="bento-dashboard fade-in">
+    <div className="max-w-[1400px] mx-auto flex flex-col gap-8 animate-[fadeIn_0.5s_ease]">
       <style>{`
         .topic-notes-btn {
           background: transparent !important;
@@ -556,64 +556,72 @@ export default function CategoryPage() {
         }
       `}</style>
       {/* Hero Header */}
-      <div className="bento-hero slide-up">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button onClick={() => navigate('/dashboard')} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: '44px', height: '44px', borderRadius: '50%', color: 'white', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-            <BarChart3 size={20} style={{transform: 'rotate(-90deg)'}} />
+      <div className="bg-card border border-border rounded-xl p-6 md:p-8 md:px-10 flex flex-col md:flex-row items-center md:items-center justify-between gap-6 md:gap-10 shadow-md relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-accent-gradient animate-[slideUp_0.4s_ease]">
+        <div className="flex flex-col sm:flex-row flex-1 items-center sm:items-start text-center sm:text-left gap-4">
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-secondary border border-border text-customText-primary flex items-center justify-center transition-all duration-200 hover:bg-card hover:border-accent-primary"
+          >
+            <BarChart3 size={20} className="-rotate-90" />
           </button>
           <div>
-            <h1 style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px', background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{category.name}</h1>
-            <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '1rem' }}>
-              {completedTopics} of {totalTopics} completed • {masteredTopics} Mastered <Trophy size={14} style={{verticalAlign: 'middle', marginLeft: '4px', color: 'var(--warning)'}} />
+            <h1 className="m-0 text-[1.8rem] md:text-[2.2rem] font-extrabold tracking-[-0.5px] bg-accent-gradient bg-clip-text text-transparent">{category.name}</h1>
+            <p className="mt-1 text-customText-secondary text-[0.95rem] md:text-[1rem] flex items-center justify-center sm:justify-start">
+              {completedTopics} of {totalTopics} completed <span className="mx-2">•</span> {masteredTopics} Mastered <Trophy size={14} className="align-middle ml-1 text-warning" />
             </p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
           <ProgressRing progress={progress} size={64} strokeWidth={5} textSize="small" />
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-secondary" onClick={() => setShowImportModal(true)}><Upload size={18} style={{marginRight: '8px'}} /> Import</button>
-            <button className="btn btn-primary" onClick={() => setShowSectionModal(true)}>+ Add Section</button>
+          <div className="flex flex-row flex-wrap justify-center gap-3">
+            <button className="flex-1 sm:flex-none btn btn-secondary whitespace-nowrap" onClick={() => setShowImportModal(true)}><Upload size={18} className="mr-2" /> Import</button>
+            <button className="flex-1 sm:flex-none btn btn-primary whitespace-nowrap" onClick={() => setShowSectionModal(true)}>+ Add Section</button>
           </div>
         </div>
       </div>
 
       {/* Two-Column Grid */}
-      <div className="bento-main-grid">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
         {/* Left Column — Filters + Sections */}
-        <div>
+        <div className="flex flex-col gap-6">
           {/* Filters */}
-          <div className="category-filters" style={{ position: 'relative' }}>
-            <button
-              className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
-              onClick={() => setFilter('all')}
-            >
-              All Topics
-            </button>
-            {features.revision && (
-              <>
-                <button
-                  className={`filter-tab ${filter === 'revision' ? 'active' : ''}`}
-                  onClick={() => setFilter('revision')}
-                >
-                  Revision Due
-                </button>
-                <button
-                  className={`filter-tab ${filter === 'mastered' ? 'active' : ''}`}
-                  onClick={() => setFilter('mastered')}
-                >
-                  Mastered <Trophy size={14} style={{marginLeft: '6px', color: 'var(--warning)'}} />
-                </button>
-              </>
-            )}
-            <input
-              ref={searchInputRef}
-              type="text"
-               className="search-input"
-               placeholder="Search topics... (F)"
-               value={searchQuery}
-               onChange={(e) => setSearchQuery(e.target.value)}
-             />
-             <Search size={18} style={{position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)'}} />
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 mb-6 w-full">
+            <div className="flex flex-row overflow-x-auto pb-1 sm:pb-0 gap-2 shrink-0 hide-scrollbar">
+              <button
+                className={`px-5 py-2 rounded-full border border-border text-customText-secondary text-[0.85rem] font-medium transition-all duration-200 bg-card hover:border-border hover:text-customText-primary whitespace-nowrap ${filter === 'all' ? '!bg-accent-primary !border-accent-primary !text-white' : ''}`}
+                onClick={() => setFilter('all')}
+              >
+                All Topics
+              </button>
+              {features.revision && (
+                <>
+                  <button
+                    className={`px-5 py-2 rounded-full border border-border text-customText-secondary text-[0.85rem] font-medium transition-all duration-200 bg-card hover:border-border hover:text-customText-primary whitespace-nowrap ${filter === 'revision' ? '!bg-accent-primary !border-accent-primary !text-white' : ''}`}
+                    onClick={() => setFilter('revision')}
+                  >
+                    Revision Due
+                  </button>
+                  <button
+                    className={`px-5 py-2 rounded-full border border-border text-customText-secondary text-[0.85rem] font-medium transition-all duration-200 bg-card hover:border-border hover:text-customText-primary flex items-center whitespace-nowrap ${filter === 'mastered' ? '!bg-accent-primary !border-accent-primary !text-white' : ''}`}
+                    onClick={() => setFilter('mastered')}
+                  >
+                    Mastered <Trophy size={14} className="ml-1.5 text-warning" />
+                  </button>
+                </>
+              )}
+            </div>
+            
+            <div className="relative flex-1 min-w-[200px]">
+              <input
+                ref={searchInputRef}
+                type="text"
+                 className="w-full px-4 py-2 pr-10 rounded-full border border-border bg-card text-customText-primary text-[0.85rem] transition-colors duration-200 focus:border-accent-primary focus:outline-none placeholder:text-customText-muted"
+                 placeholder="Search topics... (F)"
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+               />
+               <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-customText-muted pointer-events-none" />
+             </div>
            </div>
 
           {/* Sections */}
@@ -633,11 +641,11 @@ export default function CategoryPage() {
               />
             ))
           ) : (
-            <div className="empty-state">
-             <div className="empty-icon">
+            <div className="text-center py-16 px-5 text-customText-muted">
+             <div className="text-[48px] mb-4 opacity-50 flex justify-center">
                 {filter === 'revision' ? <CheckCircle2 size={48} /> : filter === 'mastered' ? <Trophy size={48} /> : <ClipboardList size={48} />}
               </div>
-              <p>
+              <p className="text-[1rem] mb-5">
                 {filter === 'revision'
                   ? 'All caught up! No topics due for revision.'
                   : filter === 'mastered'
@@ -649,10 +657,10 @@ export default function CategoryPage() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="bento-sidebar">
+        <div className="flex flex-col gap-6 md:sticky md:top-8 animate-[slideUp_0.4s_ease]">
           {/* Progress Card */}
-          <div className="bento-widget">
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem', color: 'var(--text-primary)' }}>Subject Mastery</h3>
+          <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+            <h3 className="mb-5 text-[1.1rem] text-customText-primary font-bold">Subject Mastery</h3>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <ProgressRing progress={progress} size={140} strokeWidth={10} textSize="large" />
             </div>
@@ -667,15 +675,15 @@ export default function CategoryPage() {
           )}
           {/* Upcoming Revisions — only for revision-enabled categories */}
           {features.revision && (
-            <div className="bento-widget">
-              <h3 style={{ marginBottom: '16px', fontSize: '1.1rem', color: 'var(--text-primary)' }}>Upcoming Revisions</h3>
+            <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+              <h3 className="mb-4 text-[1.1rem] text-customText-primary font-bold">Upcoming Revisions</h3>
               {allDueTopics.length > 0 ? (
-                <ul className="revision-list">
+                <ul className="flex flex-col m-0 p-0 list-none">
                   {allDueTopics.slice(0, 5).map((topic) => (
-                    <li key={topic._id}>
-                      <span className="topic-name">{topic.name}</span>
-                      <span className={`revision-badge ${
-                        new Date(topic.nextReview) <= new Date() ? 'due' : 'upcoming'
+                    <li key={topic._id} className="flex justify-between items-center py-3 border-b border-border last:border-0">
+                      <span className="font-semibold text-customText-primary text-[0.95rem] truncate max-w-[150px]">{topic.name}</span>
+                      <span className={`px-2.5 py-1 rounded-full text-[0.75rem] font-bold tracking-[0.5px] uppercase ${
+                        new Date(topic.nextReview) <= new Date() ? 'bg-[#e74c3c]/10 text-danger' : 'bg-[#3498db]/10 text-info'
                       }`}>
                         {getRevisionLabel(topic.nextReview)}
                       </span>

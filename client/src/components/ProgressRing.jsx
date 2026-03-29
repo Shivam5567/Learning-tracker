@@ -3,9 +3,15 @@ export default function ProgressRing({ progress, size = 60, strokeWidth = 4, tex
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
 
+  const textualSizes = {
+    small: 'text-[0.85rem]',
+    medium: 'text-[1.2rem]',
+    large: 'text-[1.8rem]',
+  };
+
   return (
-    <div className="progress-ring-container" style={{ width: size, height: size }}>
-      <svg className="progress-ring" width={size} height={size}>
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size}>
         {/* Background circle */}
         <circle
           cx={size / 2}
@@ -26,6 +32,7 @@ export default function ProgressRing({ progress, size = 60, strokeWidth = 4, tex
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
+          className="transition-[stroke-dashoffset] duration-[800ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
         <defs>
@@ -35,7 +42,9 @@ export default function ProgressRing({ progress, size = 60, strokeWidth = 4, tex
           </linearGradient>
         </defs>
       </svg>
-      <span className={`progress-ring-text ${textSize}`}>{progress}%</span>
+      <span className={`absolute font-bold text-customText-primary ${textualSizes[textSize]}`}>
+        {progress}%
+      </span>
     </div>
   );
 }

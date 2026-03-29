@@ -100,12 +100,12 @@ function ProtectedRoute({ children }) {
   }
 
   return (
-    <div className="app-layout">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <Sidebar 
         onSearchOpen={() => setSearchOpen(true)} 
         onReadmeOpen={() => setReadmeOpen(true)}
       />
-      <main className="main-content">
+      <main className="flex-1 ml-0 md:ml-[72px] pb-[80px] md:pb-8 px-4 md:px-10 pt-6 md:pt-8 min-h-screen">
         {children}
       </main>
       <PomodoroTimer />

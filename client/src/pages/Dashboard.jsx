@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCategories, createCategory, deleteCategory, getDueTopics } from '../api';
+import { useAuth } from '../context/AuthContext';
 import CategoryCard from '../components/CategoryCard';
 import Modal from '../components/Modal';
 import ActivityCalendar from '../components/ActivityCalendar';
@@ -16,6 +17,7 @@ const PRESET_CATEGORIES = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [dueCount, setDueCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -111,42 +113,44 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="bento-dashboard fade-in">
-      <div className="bento-hero slide-up">
-        <div className="bento-hero-left">
-          <div className="date-display">{formattedDate}</div>
-          <h1>{greeting}, Learner.</h1>
-          <p>Ready to continue your journey?</p>
+    <div className="max-w-[1400px] mx-auto flex flex-col gap-8 animate-[fadeIn_0.5s_ease]">
+      <div className="bg-card border border-border rounded-xl p-6 md:p-8 md:px-10 flex flex-col md:flex-row items-center md:items-center justify-between gap-6 md:gap-10 shadow-md relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-accent-gradient animate-[slideUp_0.4s_ease]">
+        <div className="flex flex-col text-center md:text-left">
+          <div className="text-accent-primary font-semibold text-[1.1rem] mb-1.5 uppercase tracking-[1px]">{formattedDate}</div>
+          <h1 className="text-[2.5rem] font-extrabold mb-2 tracking-tight bg-accent-gradient bg-clip-text text-transparent">{greeting}, {user?.name?.split(' ')[0] || 'Learner'}.</h1>
+          <p className="text-customText-secondary text-[1.1rem]">Ready to continue your journey?</p>
         </div>
-        <div className="bento-hero-right">
-           <div className="bento-stat-group">
-              <div className="bento-mini-stat">
-                <span className="value">{categories.length}</span>
-                <span className="label">Categories</span>
+        <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10 w-full md:w-auto mt-4 md:mt-0 justify-center">
+           <div className="flex flex-row sm:flex-col gap-6 w-full sm:w-auto justify-between sm:justify-start">
+              <div className="flex flex-col text-center sm:text-left flex-1 sm:flex-none">
+                <span className="text-[1.75rem] font-bold text-customText-primary leading-[1.1]">{categories.length}</span>
+                <span className="text-[0.7rem] sm:text-[0.85rem] text-customText-muted uppercase tracking-[0.5px] mt-1 font-semibold">Categories</span>
               </div>
-              <div className="bento-mini-stat">
-                <span className="value">{totalTopics}</span>
-                <span className="label">Total Topics</span>
-              </div>
-           </div>
-           <div className="bento-stat-group">
-              <div className="bento-mini-stat">
-                <span className="value" style={{color: dueCount > 0 ? 'var(--warning)' : 'var(--text-primary)'}}>{dueCount}</span>
-                <span className="label">Due Revision</span>
-              </div>
-              <div className="bento-mini-stat">
-                <span className="value">{overallProgress}%</span>
-                <span className="label">Mastered</span>
+              <div className="flex flex-col text-center sm:text-left flex-1 sm:flex-none">
+                <span className="text-[1.75rem] font-bold text-customText-primary leading-[1.1]">{totalTopics}</span>
+                <span className="text-[0.7rem] sm:text-[0.85rem] text-customText-muted uppercase tracking-[0.5px] mt-1 font-semibold">Total Topics</span>
               </div>
            </div>
-           <ProgressRing progress={overallProgress} size={120} strokeWidth={8} textSize="large" />
+           <div className="flex flex-row sm:flex-col gap-6 w-full sm:w-auto justify-between sm:justify-start">
+              <div className="flex flex-col text-center sm:text-left flex-1 sm:flex-none">
+                <span className="text-[1.75rem] font-bold leading-[1.1]" style={{color: dueCount > 0 ? 'var(--warning)' : 'var(--text-primary)'}}>{dueCount}</span>
+                <span className="text-[0.7rem] sm:text-[0.85rem] text-customText-muted uppercase tracking-[0.5px] mt-1 font-semibold">Due Revision</span>
+              </div>
+              <div className="flex flex-col text-center sm:text-left flex-1 sm:flex-none">
+                <span className="text-[1.75rem] font-bold text-customText-primary leading-[1.1]">{overallProgress}%</span>
+                <span className="text-[0.7rem] sm:text-[0.85rem] text-customText-muted uppercase tracking-[0.5px] mt-1 font-semibold">Mastered</span>
+              </div>
+           </div>
+           <div className="mt-2 sm:mt-0 flex justify-center w-full sm:w-auto">
+              <ProgressRing progress={overallProgress} size={100} strokeWidth={8} textSize="medium" />
+           </div>
         </div>
       </div>
 
-      <div className="bento-main-grid">
-         <div className="bento-main-left">
-            <h2 className="bento-section-title"><Library size={20} style={{marginRight: '8px', verticalAlign: 'text-bottom'}} /> Your Subjects</h2>
-            <div className="categories-grid slide-up" style={{ animationDelay: '0.1s' }}>
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6 items-start">
+         <div className="w-full">
+            <h2 className="text-[1.25rem] font-bold mb-5 text-customText-primary flex items-center gap-[10px]"><Library size={20} className="align-text-bottom" /> Your Subjects</h2>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5 animate-[slideUp_0.4s_ease]" style={{ animationDelay: '0.1s' }}>
               {categories.map((category) => (
                 <CategoryCard
                   key={category._id}
@@ -156,25 +160,25 @@ export default function Dashboard() {
                 />
               ))}
 
-              <div className="category-card add-new" onClick={() => setShowModal(true)}>
-                <div className="add-icon">+</div>
-                <span>Add New Category</span>
+              <div className="bg-card border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-4 text-customText-secondary transition-all duration-200 cursor-pointer min-h-[160px] hover:border-accent-primary hover:text-accent-primary hover:bg-accent-primary/5" onClick={() => setShowModal(true)}>
+                <div className="w-12 h-12 bg-border rounded-full flex items-center justify-center text-[24px] font-bold transition-all duration-200 text-customText-secondary group-hover:bg-accent-primary/20 group-hover:text-accent-primary">+</div>
+                <span className="font-semibold text-[1rem]">Add New Category</span>
               </div>
             </div>
          </div>
          
-         <div className="bento-sidebar slide-up" style={{ animationDelay: '0.2s' }}>
-            <h2 className="bento-section-title"><Zap size={20} style={{marginRight: '8px', verticalAlign: 'text-bottom'}} /> Priority Actions</h2>
-            <div className="bento-widget" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-               <button className="btn btn-primary" style={{width: '100%', justifyContent: 'center'}} onClick={() => setShowModal(true)}>+ New Subject</button>
-               <button className="btn btn-secondary" style={{width: '100%', justifyContent: 'center'}} onClick={() => navigate('/todo')}><ClipboardList size={18} style={{marginRight: '8px'}} /> Weekly Planner</button>
+         <div className="flex flex-col gap-6 md:sticky md:top-8 animate-[slideUp_0.4s_ease]" style={{ animationDelay: '0.2s' }}>
+            <h2 className="text-[1.25rem] font-bold mb-5 text-customText-primary flex items-center gap-[10px]"><Zap size={20} className="align-text-bottom" /> Priority Actions</h2>
+            <div className="bg-card border border-border rounded-lg p-6 shadow-sm flex flex-col gap-3">
+               <button className="btn btn-primary w-full justify-center" onClick={() => setShowModal(true)}>+ New Subject</button>
+               <button className="btn btn-secondary w-full justify-center" onClick={() => navigate('/todo')}><ClipboardList size={18} className="mr-2" /> Weekly Planner</button>
             </div>
          </div>
       </div>
 
-      <div className="slide-up" style={{ width: '100%', animationDelay: '0.3s' }}>
-         <h2 className="bento-section-title"><Flame size={20} style={{marginRight: '8px', verticalAlign: 'text-bottom'}} /> Consistency Streak</h2>
-         <div className="bento-widget" style={{ padding: '32px' }}>
+      <div className="animate-[slideUp_0.4s_ease] w-full" style={{ animationDelay: '0.3s' }}>
+         <h2 className="text-[1.25rem] font-bold mb-5 text-customText-primary flex items-center gap-[10px]"><Flame size={20} className="align-text-bottom" /> Consistency Streak</h2>
+         <div className="bg-card border border-border rounded-lg p-8 shadow-sm">
             <ActivityCalendar />
          </div>
       </div>
@@ -182,50 +186,52 @@ export default function Dashboard() {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Create New Category">
         {/* Preset Categories */}
         {availablePresets.length > 0 && (
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+          <div className="mb-6">
+            <label className="block text-[0.85rem] font-medium text-customText-secondary mb-2.5">
               Quick Add
             </label>
-            <div className="preset-category-grid">
+            <div className="grid grid-cols-2 gap-3">
               {availablePresets.map((preset) => (
                 <button
                   key={preset.name}
-                  className="preset-category-btn"
+                  className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg text-customText-primary font-medium text-[0.95rem] cursor-pointer transition-all duration-200 hover:border-accent-primary hover:text-accent-primary hover:bg-accent-primary/5 hover:-translate-y-[2px]"
                   onClick={() => handlePresetCreate(preset)}
                 >
-                  <span className="preset-icon">
+                  <span className="text-accent-primary flex items-center justify-center">
                     {preset.name === 'DSA' ? <Laptop size={20} /> : preset.name === 'Books' ? <Library size={20} /> : preset.name === 'Theory Subjects' ? <Calculator size={20} /> : <FlaskConical size={20} />}
                   </span>
                   <span>{preset.name}</span>
                 </button>
               ))}
             </div>
-            <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', margin: '16px 0 8px' }}>
+            <div className="text-center text-customText-muted text-[0.8rem] my-4 mt-6">
               — or create custom —
             </div>
           </div>
         )}
 
         <form onSubmit={handleCreate}>
-          <div className="modal-field">
-            <label>Category Name</label>
+          <div className="mb-5">
+            <label className="block text-[0.85rem] font-medium text-customText-secondary mb-2">Category Name</label>
             <input
               type="text"
               placeholder="e.g. System Design, Web Dev"
+              className="w-full px-4 py-3 bg-input border border-border rounded-md text-customText-primary text-[0.95rem] transition-colors duration-200 focus:border-accent-primary outline-none focus:ring-1 focus:ring-accent-primary"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               autoFocus
             />
           </div>
-          <div className="modal-field">
-            <label>Description (optional)</label>
+          <div className="mb-5">
+            <label className="block text-[0.85rem] font-medium text-customText-secondary mb-2">Description (optional)</label>
             <textarea
               placeholder="Brief description of this category"
+              className="w-full px-4 py-3 bg-input border border-border rounded-md text-customText-primary text-[0.95rem] transition-colors duration-200 focus:border-accent-primary outline-none focus:ring-1 focus:ring-accent-primary min-h-[100px] resize-y"
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
             />
           </div>
-          <div className="modal-actions">
+          <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-border">
             <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
               Cancel
             </button>

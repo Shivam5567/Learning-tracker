@@ -3,11 +3,11 @@ import { Trophy, LinkIcon, Edit3, ClipboardList } from './Icons';
 
 export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, onShowNotes, features = {} }) {
   return (
-    <div className="topic-row" onClick={() => onEdit(topic)}>
-      <span className="topic-chevron">›</span>
+    <div className="flex items-center px-4 py-3 rounded-md mb-1 transition-colors duration-200 cursor-pointer hover:bg-white/5 group relative" onClick={() => onEdit(topic)}>
+      <span className="w-5 h-5 flex flex-shrink-0 items-center justify-center mr-3 text-customText-muted text-[12px] font-bold">›</span>
 
       <div
-        className={`topic-checkbox ${topic.completed ? 'checked' : ''}`}
+        className={`w-5 h-5 flex flex-shrink-0 rounded-[4px] border-2 border-customText-muted mr-3 items-center justify-center transition-all duration-200 ${topic.completed ? '!bg-success !border-success text-white text-[12px]' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
           onToggleComplete(topic);
@@ -16,11 +16,11 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, on
         {topic.completed && '✓'}
       </div>
 
-      <span className={`topic-name ${topic.completed ? 'completed' : ''} ${topic.isMastered ? 'mastered' : ''}`}>
+      <span className={`flex-1 text-[0.95rem] text-customText-primary flex items-center flex-wrap gap-2 ${topic.completed ? 'text-customText-muted line-through' : ''} ${topic.isMastered ? 'mastered' : ''}`}>
         {/* Mastery Trophy */}
         {topic.isMastered && (
           <span className="mastery-trophy" title="Mastered! (365+ day interval)">
-            <Trophy size={14} style={{ color: 'var(--warning)' }} />
+            <Trophy size={14} className="text-warning" />
           </span>
         )}
 
@@ -50,21 +50,21 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, on
         )}
 
         {topic.url ? (
-          <a href={topic.url.startsWith('http') ? topic.url : `https://${topic.url}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>
-            {topic.name} <LinkIcon size={12} style={{ marginLeft: '6px', opacity: 0.8 }} title="Open link" />
+          <a href={topic.url.startsWith('http') ? topic.url : `https://${topic.url}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="inline-flex items-center text-inherit no-underline hover:text-accent-primary">
+            {topic.name} <LinkIcon size={12} className="ml-1.5 opacity-80" title="Open link" />
           </a>
         ) : (
           topic.name
         )}
         {/* Books: Pages progress */}
         {features.pagesRead && topic.totalPages > 0 && (
-          <span style={{ marginLeft: '8px', fontSize: '0.8em', color: 'var(--text-muted)', fontWeight: 500 }}>
+          <span className="ml-2 text-[0.8em] text-customText-muted font-medium">
             {topic.pagesRead}/{topic.totalPages}p
           </span>
         )}
         {topic.notes && (
           <button 
-            className="topic-notes-btn"
+            className="bg-transparent border-none p-1 ml-2 text-customText-muted cursor-pointer rounded-sm inline-flex items-center transition-all duration-200 opacity-70 w-auto h-auto min-w-0 leading-none hover:bg-secondary hover:text-accent-primary hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               onShowNotes(topic);
@@ -80,9 +80,9 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, on
         <RevisionBadge nextReview={topic.nextReview} />
       )}
 
-      <div style={{ display: 'flex', gap: '4px' }}>
+      <div className="flex gap-1 ml-auto">
         <button
-          className="topic-delete"
+          className="w-7 h-7 flex items-center justify-center rounded-sm bg-transparent border-none text-customText-muted cursor-pointer opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-white/10 hover:text-customText-primary"
           onClick={(e) => {
             e.stopPropagation();
             onEdit(topic);
@@ -92,7 +92,7 @@ export default function TopicRow({ topic, onToggleComplete, onDelete, onEdit, on
           <Edit3 size={16} />
         </button>
         <button
-          className="topic-delete"
+          className="w-7 h-7 flex items-center justify-center rounded-sm bg-transparent border-none text-customText-muted cursor-pointer opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-white/10 hover:text-danger font-bold text-lg"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(topic);

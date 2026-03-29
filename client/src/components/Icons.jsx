@@ -222,3 +222,28 @@ export const LinkIcon = ({ size = 20, ...props }) => (
     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
   </svg>
 );
+
+export const Folder = ({ size = 20, ...props }) => (
+  <svg {...iconProps} width={size} height={size} {...props}>
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+export const CheckCircle = ({ size = 20, ...props }) => (
+  <svg {...iconProps} width={size} height={size} {...props}>
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
+  </svg>
+);
+
+export const Circle = ({ size = 20, ...props }) => (
+  <svg {...iconProps} width={size} height={size} {...props}>
+    <circle cx="12" cy="12" r="10" />
+  </svg>
+);
+
+export const ChevronRight = ({ size = 20, ...props }) => (
+  <svg {...iconProps} width={size} height={size} {...props}>
+    <path d="m9 18 6-6-6-6" />
+  </svg>
+);
