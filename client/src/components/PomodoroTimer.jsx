@@ -49,8 +49,8 @@ export default function PomodoroTimer() {
   const dragStartPos = useRef({ x: 0, y: 0 });
   const hasMoved = useRef(false);
 
-  const timerRef = useRef(null);
   const audioRef = useRef(null);
+  const timerRef = useRef(null);
 
   // --- FIXED PROGRESS MATH ---
   const currentTotalMins = mode.name === 'Custom' ? customMinutes : mode.minutes;
@@ -99,7 +99,6 @@ export default function PomodoroTimer() {
       if (soundData?.url) {
         if (!audioRef.current) {
           audioRef.current = new Audio(soundData.url);
-          audioRef.current.crossOrigin = 'anonymous';
           audioRef.current.loop = true;
         } else {
           audioRef.current.src = soundData.url;
@@ -116,11 +115,26 @@ export default function PomodoroTimer() {
     };
   }, [activeSound, isRunning, volume]);
 
+  // Generate beep using Web Audio API (no external URL needed)
   const playBeep = () => {
     try {
-      const audio = new Audio("https://orangefreesounds.com/wp-content/uploads/2024/01/Beep-beep-notification-sound.mp3");
-      audio.volume = 0.5;
-      audio.play().catch(e => console.warn('Autoplay prevented:', e));
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const playTone = (freq, startTime, duration) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.4, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      };
+      // Three ascending tones
+      playTone(523, ctx.currentTime, 0.15);       // C5
+      playTone(659, ctx.currentTime + 0.18, 0.15); // E5
+      playTone(784, ctx.currentTime + 0.36, 0.3);  // G5
     } catch (e) {
       console.warn('Audio error:', e);
     }
