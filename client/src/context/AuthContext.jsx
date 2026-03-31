@@ -10,10 +10,21 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      setUser(parsed);
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        if (parsed && parsed.token) {
+          setUser(parsed);
+        } else {
+          // Invalid data, clean up
+          localStorage.removeItem('user');
+        }
+      }
+    } catch (e) {
+      // Corrupted localStorage data, clean up
+      console.warn('Cleared corrupted auth data from localStorage');
+      localStorage.removeItem('user');
     }
     setLoading(false);
   }, []);

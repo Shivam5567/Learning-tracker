@@ -6,12 +6,32 @@ const API = axios.create({
 
 // Attach JWT token to every request
 API.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (user?.token) {
-    config.headers.Authorization = `Bearer ${user.token}`;
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user?.token) {
+      config.headers.Authorization = `Bearer ${user.token}`;
+    }
+  } catch (e) {
+    // Corrupted localStorage, ignore
   }
   return config;
 });
+
+// Auto-logout on 401 (expired/invalid token)
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Don't auto-logout for login/register requests (they return 401 for wrong credentials)
+      const url = error.config?.url || '';
+      if (!url.includes('/auth/login') && !url.includes('/auth/register')) {
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Auth
 export const register = (data) => API.post('/auth/register', data);

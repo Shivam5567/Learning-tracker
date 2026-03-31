@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import ConfirmDialog from './ConfirmDialog';
+import { useTheme } from '../context/ThemeContext';
 
 const MODES = {
   POMODORO: { name: 'Pomodoro', minutes: 25, color: '#8e44ad' },
@@ -31,6 +32,8 @@ const AMBIENT_SOUNDS = [
 ];
 
 export default function PomodoroTimer() {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [mode, setMode] = useState(MODES.POMODORO);
   const [customMinutes, setCustomMinutes] = useState(MODES.CUSTOM.minutes);
   const [timeLeft, setTimeLeft] = useState(MODES.POMODORO.minutes * 60);
@@ -280,7 +283,7 @@ export default function PomodoroTimer() {
             <svg className="absolute top-0 left-0 -rotate-90 pointer-events-none" width="120" height="120" viewBox="0 0 120 120">
               <circle
                 cx="60" cy="60" r={mainRadius}
-                style={{ fill: 'none', stroke: 'rgba(255, 255, 255, 0.1)', strokeWidth: '6px' }}
+                style={{ fill: 'none', stroke: isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.1)', strokeWidth: '6px' }}
               />
               <circle
                 className={isRunning ? 'animate-breathe' : ''}

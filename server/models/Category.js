@@ -132,6 +132,9 @@ categorySchema.virtual('completedTopics').get(function () {
   }, 0);
 });
 
+// Database indexes for performance
+categorySchema.index({ user: 1, createdAt: -1 });
+
 // Include virtuals in JSON
 categorySchema.set('toJSON', { virtuals: true });
 categorySchema.set('toObject', { virtuals: true });
